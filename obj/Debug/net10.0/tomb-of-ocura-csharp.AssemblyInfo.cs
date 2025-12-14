@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("tomb-of-ocura-csharp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1469077da7f3af774da9b2b8daa55bf295ded5be")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7ed2f0a172a9af675e742a9a90d2feafa783c253")]
 [assembly: System.Reflection.AssemblyProductAttribute("tomb-of-ocura-csharp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("tomb-of-ocura-csharp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
