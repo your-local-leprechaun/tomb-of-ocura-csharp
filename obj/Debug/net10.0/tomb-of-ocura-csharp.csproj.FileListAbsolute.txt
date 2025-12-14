@@ -1,0 +1,15 @@
+C:\Users\lukem\Desktop\Coding\C#\tomb-of-ocura-csharp\bin\Debug\net10.0\tomb-of-ocura-csharp.exe
+C:\Users\lukem\Desktop\Coding\C#\tomb-of-ocura-csharp\bin\Debug\net10.0\tomb-of-ocura-csharp.deps.json
+C:\Users\lukem\Desktop\Coding\C#\tomb-of-ocura-csharp\bin\Debug\net10.0\tomb-of-ocura-csharp.runtimeconfig.json
+C:\Users\lukem\Desktop\Coding\C#\tomb-of-ocura-csharp\bin\Debug\net10.0\tomb-of-ocura-csharp.dll
+C:\Users\lukem\Desktop\Coding\C#\tomb-of-ocura-csharp\bin\Debug\net10.0\tomb-of-ocura-csharp.pdb
+C:\Users\lukem\Desktop\Coding\C#\tomb-of-ocura-csharp\obj\Debug\net10.0\tomb-of-ocura-csharp.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\lukem\Desktop\Coding\C#\tomb-of-ocura-csharp\obj\Debug\net10.0\tomb-of-ocura-csharp.AssemblyInfoInputs.cache
+C:\Users\lukem\Desktop\Coding\C#\tomb-of-ocura-csharp\obj\Debug\net10.0\tomb-of-ocura-csharp.AssemblyInfo.cs
+C:\Users\lukem\Desktop\Coding\C#\tomb-of-ocura-csharp\obj\Debug\net10.0\tomb-of-ocura-csharp.csproj.CoreCompileInputs.cache
+C:\Users\lukem\Desktop\Coding\C#\tomb-of-ocura-csharp\obj\Debug\net10.0\tomb-of-ocura-csharp.sourcelink.json
+C:\Users\lukem\Desktop\Coding\C#\tomb-of-ocura-csharp\obj\Debug\net10.0\tomb-of-ocura-csharp.dll
+C:\Users\lukem\Desktop\Coding\C#\tomb-of-ocura-csharp\obj\Debug\net10.0\refint\tomb-of-ocura-csharp.dll
+C:\Users\lukem\Desktop\Coding\C#\tomb-of-ocura-csharp\obj\Debug\net10.0\tomb-of-ocura-csharp.pdb
+C:\Users\lukem\Desktop\Coding\C#\tomb-of-ocura-csharp\obj\Debug\net10.0\tomb-of-ocura-csharp.genruntimeconfig.cache
+C:\Users\lukem\Desktop\Coding\C#\tomb-of-ocura-csharp\obj\Debug\net10.0\ref\tomb-of-ocura-csharp.dll
