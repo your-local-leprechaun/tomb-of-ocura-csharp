@@ -1,25 +1,32 @@
 
-/*
-Interface for all Room objects in this text-based rpg adventure game. This script ensures that
-all rooms have a consistent way to interact with them from other classes. 
-*/
-interface IRoom
+namespace TombOfOcura.Rooms
 {
-    string Description { get;}
+    /*
+    Interface for all Room objects in this text-based rpg adventure game. This script ensures that
+    all rooms have a consistent way to interact with them from other classes. 
+    */
+    interface IRoom
+    {
+        string Name { get; }
+        
+        string Description { get; }
 
-    void RemoveItem();
+        string HandleCommand(string command);
 
-    void AddItem();
+        bool RemoveItem(string item);
 
-    string[] GetChoices();
+        void AddItem(string item);
 
-    bool RemoveChoice(string toRemove);
+        List<string> GetChoices();
 
-    void AddChoice(string toAdd);
+        bool RemoveChoice(string toRemove);
 
-    void AddEnemies();
+        void AddChoice(string toAdd);
+        
+        bool RemoveEnemy(string enemy);
 
-    void RemoveEnemy();
+        void AddEnemies(string enemy);
 
-    void RespawnEnemies();
+        void RespawnEnemies();
+    }
 }
