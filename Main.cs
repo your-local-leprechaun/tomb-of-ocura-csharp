@@ -6,6 +6,7 @@ using Utilities;
 using TombOfOcura.Rooms;
 using TombOfOcura.Item.Consumable;
 using TombOfOcura.Item.Armor;
+using TombOfOcura.Item.AttackItem.Melee;
 
 namespace Main
 {
@@ -44,6 +45,14 @@ namespace Main
             General.PrintOut($"Type: {armor.Type}");
             General.PrintOut($"Defense: {armor.Defense}");
             General.PrintOut($"Required Level: {armor.RequiredLevel} Vigor");
+
+            Console.WriteLine();
+            // Testing Melee Attack Item
+            Melee melee = new MeleeExample();
+            General.PrintOut($"Item: {melee.Name}");
+            General.PrintOut($"Description: {melee.Description}");
+            General.PrintOut($"Type: {melee.Type}");
+            melee.Attack();
         }   
     }
 }
