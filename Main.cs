@@ -4,6 +4,8 @@ this, the program as a whole will start
 */
 using Utilities;
 using TombOfOcura.Rooms;
+using TombOfOcura.Item.Consumable;
+using TombOfOcura.Item.Armor;
 
 namespace Main
 {
@@ -26,6 +28,22 @@ namespace Main
             {
                 General.PrintOut(choice);
             }
+
+            // Testing Consumable Item
+            Consumable consumable = new ConsumableExample();
+            General.PrintOut($"Item: {consumable.Name}");
+            General.PrintOut($"Description: {consumable.Description}");
+            General.PrintOut($"Type: {consumable.Type}");
+            consumable.Consume();
+
+            Console.WriteLine();
+            // Testing Armor
+            Armor armor = new ArmorExample();
+            General.PrintOut($"Item: {armor.Name}");
+            General.PrintOut($"Description: {armor.Description}");
+            General.PrintOut($"Type: {armor.Type}");
+            General.PrintOut($"Defense: {armor.Defense}");
+            General.PrintOut($"Required Level: {armor.RequiredLevel} Vigor");
         }   
     }
 }
