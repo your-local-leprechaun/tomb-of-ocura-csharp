@@ -7,6 +7,7 @@ using TombOfOcura.Rooms;
 using TombOfOcura.Item.Consumable;
 using TombOfOcura.Item.Armor;
 using TombOfOcura.Item.AttackItem.Melee;
+using TombOfOcura.Item.AttackItem.Spell;
 
 namespace Main
 {
@@ -53,6 +54,14 @@ namespace Main
             General.PrintOut($"Description: {melee.Description}");
             General.PrintOut($"Type: {melee.Type}");
             melee.Attack();
+
+            Console.WriteLine();
+            // Testing Spell Attack Item
+            Spell spell = new SpellExample();
+            General.PrintOut($"Item: {spell.Name}");
+            General.PrintOut($"Description: {spell.Description}");
+            General.PrintOut($"Type: {spell.Type}");
+            spell.Attack();
         }   
     }
 }
