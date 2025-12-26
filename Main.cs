@@ -8,6 +8,8 @@ using TombOfOcura.Item.Consumable;
 using TombOfOcura.Item.Armor;
 using TombOfOcura.Item.AttackItem.Melee;
 using TombOfOcura.Item.AttackItem.Spell;
+using TombOfOcura.Stat.StatManager;
+using TombOfOcura.Stat;
 
 namespace Main
 {
@@ -62,6 +64,21 @@ namespace Main
             General.PrintOut($"Description: {spell.Description}");
             General.PrintOut($"Type: {spell.Type}");
             spell.Attack();
+
+            Console.WriteLine();
+            // Testing Stat Manager
+            StatManager statManager = new StatManager();
+            General.PrintOut("Initial Stats:");
+            foreach (var stat in statManager.GetAllStats())
+            {
+                General.PrintOut($"{stat.Key}: {stat.Value}");
+            }
+
+            General.PrintOut("Updating Focus by 5...");
+            statManager.UpdateStat(StatType.Focus, 5);
+            General.PrintOut($"New Focus: {statManager.GetStat(StatType.Focus)}");
+
+            
         }   
     }
 }
