@@ -83,7 +83,8 @@ namespace Main
 
             Console.WriteLine();
             // Testing Enemy (Slime)
-            Enemy slime = new Slime();
+            ISpawner<Slime> slimeSpawner = new SlimeSpawner();
+            Enemy slime = slimeSpawner.Spawn();
             General.PrintOut($"Enemy: {slime.Name}");
             General.PrintOut($"Experience: {slime.Experience}xp");
             General.PrintOut($"Stats: {JsonSerializer.Serialize(slime.StatManager.GetAllStats())}");
