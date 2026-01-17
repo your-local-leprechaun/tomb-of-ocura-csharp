@@ -10,6 +10,9 @@ using TombOfOcura.Item.AttackItem.Melee;
 using TombOfOcura.Item.AttackItem.Spell;
 using TombOfOcura.Stat.StatManager;
 using TombOfOcura.Stat;
+using TombOfOcura.Enemy;
+using TombOfOcura.Enemy.Slime;
+using System.Text.Json;
 
 namespace Main
 {
@@ -78,7 +81,12 @@ namespace Main
             statManager.UpdateStat(StatType.Focus, 5);
             General.PrintOut($"New Focus: {statManager.GetStat(StatType.Focus)}");
 
-            
+            Console.WriteLine();
+            // Testing Enemy (Slime)
+            Enemy slime = new Slime();
+            General.PrintOut($"Enemy: {slime.Name}");
+            General.PrintOut($"Experience: {slime.Experience}xp");
+            General.PrintOut($"Stats: {JsonSerializer.Serialize(slime.StatManager.GetAllStats())}");
         }   
     }
 }
