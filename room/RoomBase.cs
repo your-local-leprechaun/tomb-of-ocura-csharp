@@ -1,15 +1,18 @@
 
+using TombOfOcura.Enemy;
+using TombOfOcura.Item;
+
 namespace TombOfOcura.Rooms
 {
-    public abstract class RoomBase : IRoom
+    public abstract class Room : IRoom
     {
         public string Name { get; }
         public string Description { get; protected set;}
         protected readonly List<string> Choices = new();
-        protected readonly List<string> Items = new();
-        protected readonly List<string> Enemies = new();
+        protected readonly List<IItem> Items = new();
+        protected readonly List<IEnemy> Enemies = new();
 
-        protected RoomBase(string name, string description)
+        protected Room(string name, string description)
         {
             Name = name;
             Description = description;
@@ -17,12 +20,12 @@ namespace TombOfOcura.Rooms
 
         public abstract string HandleCommand(string command);
 
-        public bool RemoveItem(string item)
+        public bool RemoveItem(IItem item)
         {
             return Items.Remove(item);
         }
 
-        public void AddItem(string item)
+        public void AddItem(IItem item)
         {
             Items.Add(item);
             return;
@@ -44,12 +47,12 @@ namespace TombOfOcura.Rooms
             return;
         }
 
-        public bool RemoveEnemy(string enemy)
+        public bool RemoveEnemy(IEnemy enemy)
         {
             return Enemies.Remove(enemy);
         }
 
-        public void AddEnemies(string enemy)
+        public void AddEnemies(IEnemy enemy)
         {
             Enemies.Add(enemy);
             return;
