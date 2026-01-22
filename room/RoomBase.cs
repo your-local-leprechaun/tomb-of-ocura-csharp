@@ -59,5 +59,15 @@ namespace TombOfOcura.Rooms
         }
 
         public abstract void RespawnEnemies();
+
+
+        /*
+        Updates the room's description. Protected so only the room can change it's description.
+        */
+        protected void UpdateDescription(string newDescription)
+        {
+            Description = newDescription;
+            return;
+        }
     }
 }
