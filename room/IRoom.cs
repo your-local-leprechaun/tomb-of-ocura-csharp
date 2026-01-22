@@ -1,9 +1,15 @@
 
+using TombOfOcura.Enemy;
+using TombOfOcura.Item;
+
 namespace TombOfOcura.Rooms
 {
     /*
     Interface for all Room objects in this text-based rpg adventure game. This script ensures that
     all rooms have a consistent way to interact with them from other classes. 
+
+    All Rooms should use the singleton pattern, as only one of them should exsist.
+    This must be made in each implimentation of the RoomBase class.
     */
     interface IRoom
     {
@@ -32,12 +38,12 @@ namespace TombOfOcura.Rooms
         /*
         Removes an item from the room. Returns true if successful, false otherwise.
         */
-        bool RemoveItem(string item);
+        bool RemoveItem(IItem item);
 
         /*
         Adds an item to the room.
         */
-        void AddItem(string item);
+        void AddItem(IItem item);
 
         /*
         Returns the list of choices avaliable in this room that are public. Not all 
@@ -58,12 +64,12 @@ namespace TombOfOcura.Rooms
         /*
         Removes an enemy from the room. Returns true if successful, false otherwise.
         */
-        bool RemoveEnemy(string enemy);
+        bool RemoveEnemy(IEnemy enemy);
 
         /*
         Adds an enemy to the room. Used by RespawnEnemies to reset the room's enemies back to their original state.
         */
-        void AddEnemies(string enemy);
+        void AddEnemies(IEnemy enemy);
 
         /*
         Respawns all enemies in the room back to their original state when a rest is taken.

@@ -25,13 +25,22 @@ namespace Main
             Console.ResetColor();
 
             // Testing Rooms
-            IRoom room = new Room1();
+            IRoom room = Room1.Instance;
             General.PrintOut(room.Name);
             General.PrintOut(room.Description);
 
             General.PrintOut("Choices:");
             List<string> choices = room.GetChoices();
             foreach (string choice in choices)
+            {
+                General.PrintOut(choice);
+            }
+
+            // Testing Singleton
+            room.AddChoice("Test Choice");
+            General.PrintOut("Choices on new instance after adding 'Test Choice':");
+            IRoom roomAgain = Room1.Instance;
+            foreach (string choice in roomAgain.GetChoices())
             {
                 General.PrintOut(choice);
             }
