@@ -7,7 +7,7 @@ namespace Game
 {
     public class Game
     {
-        IState _activeState = new Testing.TestRoom();
+        IState _activeState = Testing.TestRoom.Get;
         Parser.Parser parser = new Parser.Parser();
         Frontend.Display Display = new Frontend.Display();
 

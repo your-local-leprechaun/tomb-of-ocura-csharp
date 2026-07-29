@@ -1,16 +1,21 @@
+using Basic;
 using Commands;
 using Returns;
 using State;
 
 namespace Testing
 {
-    public class TestRoom : IState
+    public sealed class TestRoom : Singleton<TestRoom>, IState
     {
+        private TestRoom() {}
+
+        public static TestRoom Get => Instance;
+
         public Return Execute(Command command)
         {
             if (command.Verb == "switch" && command.Noun == "state")
             {
-                return new Return("You switch states to TestRoom2", new TestRoom2());
+                return new Return("You switch states to TestRoom2", TestRoom2.Get);
             }
             return new Return("This is the test room");
         }
@@ -21,13 +26,28 @@ namespace Testing
         }
     }
 
-    public class TestRoom2 : IState
+    public class TestRoom2 : Singleton<TestRoom2>, IState
     {
+        private TestRoom2() {}
+
+        public static TestRoom2 Get => Instance;
+
+        bool testing = false;
+
         public Return Execute(Command command)
         {
             if (command.Verb == "switch" && command.Noun == "state")
             {
-                return new Return("You switch states to TestRoom", new TestRoom());
+                return new Return("You switch states to TestRoom", TestRoom.Get);
+            }
+            else if (command.Verb == "grab" && command.Noun == "sword")
+            {
+                testing = true;
+                return new Return("You have changed this room. Type command to test.");
+            }
+            if (testing == true)
+            {
+                return new Return("This room has been changed!");
             }
             return new Return("This is the second test room");
         }
