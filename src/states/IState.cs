@@ -1,15 +1,22 @@
 using Commands;
+using Returns;
 
 
 namespace State
 {
-    interface IState
+    public interface IState
     {
         /// <summary>
         /// Takes in command and returns dicitonary with information on updates and dispaly
         /// </summary>
         /// <param name="command">Command to make happen</param>
-        /// <returns>Dictionary with information/updates</returns>
-        Dictionary<string, object> Execute(Command command);
+        /// <returns>Returns a Return object with message and updates</returns>
+        Return Execute(Command command);
+
+        /// <summary>
+        /// Function that triggers when this state activates withing Game
+        /// </summary>
+        /// <returns>Dictionary with information/updates.</returns>
+        Return Activate();
     }
 }

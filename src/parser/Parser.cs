@@ -16,6 +16,7 @@ namespace Parser
         {
             // Nouns
             { "sword", (TokenType.NOUN, "sword") },
+            { "state", (TokenType.NOUN, "state") },
 
             // Adjectives
             { "rusty", (TokenType.ADJECTIVE, "rusty") },
@@ -28,6 +29,7 @@ namespace Parser
             { "get", (TokenType.VERB, "grab") },
             { "walk", (TokenType.VERB, "go") },
             { "go", (TokenType.VERB, "go") },
+            { "switch", (TokenType.VERB, "switch") },
 
             // Fillers
             { "the", (TokenType.FILLER, "the") },

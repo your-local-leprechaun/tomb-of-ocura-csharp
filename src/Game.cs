@@ -1,13 +1,15 @@
 using Parser;
 using State;
 using Commands;
+using Returns;
 
 namespace Game
 {
     public class Game
     {
-        // IState _activeState = new Room.ExampleRoom();
+        IState _activeState = new Testing.TestRoom();
         Parser.Parser parser = new Parser.Parser();
+        Frontend.Display Display = new Frontend.Display();
 
         /// <summary>
         /// Everything lives in this loop. We change states here,
@@ -18,8 +20,7 @@ namespace Game
             while (true)
             {
                 // Get Player input
-                Console.Write("> ");
-                string input = Console.ReadLine() ?? "";
+                string input = Display.Input();
 
                 // Parse the command into a command that follows the order of
                 // VERB [ADJECTIVE] NOUN
@@ -30,21 +31,27 @@ namespace Game
                     // Check for basic commands (Exit)
                     if (command.Verb == "exit")
                     {
-                        Console.WriteLine("Quitting Game...");
+                        Display.Render("Exiting game...");
                         Environment.Exit(0);
                     }
 
                     // Call command to the active state, and recieve information back
-                    // Dictionary<string, object> response = _activeState.Command(command);
-
-                    // Check for updates that need to be made
+                    Return response = _activeState.Execute(command);
 
                     // Display message
-                    Console.WriteLine($"Verb: {command.Verb} Adjective: {command.Adjective} Noun: {command.Noun}");
+                    Display.Render(response.Message);
+
+                    // Update state if needed
+                    if (response.UpdateState != null)
+                    {
+                        _activeState = response.UpdateState;
+                        response = _activeState.Activate();
+                        Display.Render(response.Message);
+                    }
                 }
                 catch (ParseException e)
                 {
-                    Console.WriteLine(e.Message);
+                    Display.Render(e.Message);
                     continue;
                 }
 
