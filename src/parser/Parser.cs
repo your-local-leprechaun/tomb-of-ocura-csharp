@@ -9,6 +9,11 @@ namespace Parser
         public ParseException(string message) : base(message) {}
     }
 
+    public class CommandException : Exception
+    {
+        public CommandException(string message) : base(message) {}
+    }
+
     public sealed class Parser
     {
         // Storage of all possible words to be used!
@@ -17,6 +22,8 @@ namespace Parser
             // Nouns
             { "sword", (TokenType.NOUN, "sword") },
             { "state", (TokenType.NOUN, "state") },
+            { "game", (TokenType.NOUN, "game") },
+
 
             // Adjectives
             { "rusty", (TokenType.ADJECTIVE, "rusty") },
@@ -25,6 +32,7 @@ namespace Parser
             // Verbs
             { "exit", (TokenType.VERB, "exit") },
             { "quit", (TokenType.VERB, "exit") },
+            { "start", (TokenType.VERB, "start") },
             { "grab", (TokenType.VERB, "grab") },
             { "get", (TokenType.VERB, "grab") },
             { "walk", (TokenType.VERB, "go") },

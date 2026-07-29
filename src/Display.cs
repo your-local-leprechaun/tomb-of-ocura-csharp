@@ -25,6 +25,21 @@ namespace Frontend
             return input;
         }
 
+        public void Exit()
+        {
+            PrintOut("Are you sure you want to quit? (y/N)");
+            string response = Input().ToLower();
+            while (true)
+            {
+                if (response != "y")
+                {
+                    return;
+                }
+                
+            }
+
+        }
+
         private void PrintOut(string message, int sleep = 12)
         {
             foreach (char c in message)

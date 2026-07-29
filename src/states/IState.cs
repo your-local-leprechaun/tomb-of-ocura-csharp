@@ -14,7 +14,7 @@ namespace State
         Return Execute(Command command);
 
         /// <summary>
-        /// Function that triggers when this state activates withing Game
+        /// Function that triggers when this state activates within Game
         /// </summary>
         /// <returns>Dictionary with information/updates.</returns>
         Return Activate();

@@ -1,3 +1,5 @@
-﻿var testing = new Game.Game();
+﻿using Main;
 
-testing.GameLoop();
+Game game = new Game();
+
+game.Start();

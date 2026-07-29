@@ -3,11 +3,11 @@ using State;
 using Commands;
 using Returns;
 
-namespace Game
+namespace Main
 {
     public class Game
     {
-        IState _activeState = Testing.TestRoom.Get;
+        IState _activeState = new MainMenu();
         Parser.Parser parser = new Parser.Parser();
         Frontend.Display Display = new Frontend.Display();
 
@@ -31,8 +31,8 @@ namespace Game
                     // Check for basic commands (Exit)
                     if (command.Verb == "exit")
                     {
-                        Display.Render("Exiting game...");
-                        Environment.Exit(0);
+                        Quit();
+                        continue;
                     }
 
                     // Call command to the active state, and recieve information back
@@ -54,7 +54,34 @@ namespace Game
                     Display.Render(e.Message);
                     continue;
                 }
+                catch (CommandException e)
+                {
+                    Display.Render(e.Message);
+                    continue;
+                }
+            }
+        }
 
+        public void Start()
+        {
+            Return response = _activeState.Activate();
+            Display.Render(response.Message);
+
+            GameLoop();
+        }
+
+        public void Quit()
+        {
+            Display.Render("Are you sure you want to quit? (y/N)");
+            string response = Display.Input().ToLower();
+            while (true)
+            {
+                if (response != "y")
+                {
+                    return;
+                }
+                Display.Render("Exiting game...");
+                Environment.Exit(0);
             }
         }
     }
