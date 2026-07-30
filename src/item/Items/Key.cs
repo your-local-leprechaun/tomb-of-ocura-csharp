@@ -12,6 +12,9 @@ namespace Items
             Description = "A basic key.";
             Type = ItemType.Misc;
             ItemName = "Basic Key";
+
+            Parser.Parser.RegisterNoun("Key");
+            Parser.Parser.RegisterAdjective("Basic");
         }
     }    
 }

@@ -24,7 +24,6 @@ namespace Parser
             { "game", (TokenType.NOUN, "game") },
             { "inventory", (TokenType.NOUN, "inventory") },
             { "room", (TokenType.NOUN, "room") },
-            { "key", (TokenType.NOUN, "key") },
             { "choices", (TokenType.NOUN, "choices") },
             { "door", (TokenType.NOUN, "door") },
             { "north", (TokenType.NOUN, "north") },
@@ -42,6 +41,7 @@ namespace Parser
             { "move", (TokenType.VERB, "move") },
             { "grab", (TokenType.VERB, "grab") },
             { "get", (TokenType.VERB, "grab") },
+            { "pick up", (TokenType.VERB, "grab")},
             { "walk", (TokenType.VERB, "go") },
             { "go", (TokenType.VERB, "go") },
             { "switch", (TokenType.VERB, "switch") },
@@ -54,6 +54,18 @@ namespace Parser
             // Fillers
             { "the", (TokenType.FILLER, "the") },
         };
+
+        public static void RegisterNoun(string word)
+        {
+            word = word.ToLower();
+            Vocab[word] = (TokenType.NOUN, word);
+        }
+
+        public static void RegisterAdjective(string adjective)
+        {
+            adjective = adjective.ToLower();
+            Vocab[adjective] = (TokenType.ADJECTIVE, adjective);
+        }
 
         /// <summary>
         /// Public facing, takes in raw input and returns a list 
@@ -83,16 +95,30 @@ namespace Parser
 
         private IEnumerable<Token> Tokenize(string[] words)
         {
-            for (int i = 0; i < words.Length; i++)
+            int i = 0;
+            while (i < words.Length)
             {
+                // Try to match two-word verbs
+                if (i + 1 < words.Length)
+                {
+                    string twoWord = $"{words[i]} {words[i+1]}";
+                    if (Vocab.TryGetValue(twoWord, out var twoWordEntry))
+                    {
+                        yield return new Token(twoWordEntry.Type, twoWord, twoWordEntry.Canonical, i);
+                        i += 2;
+                        continue;
+                    }
+                }
+
+                // Match with a single word instead
                 if (Vocab.TryGetValue(words[i], out var entry))
                 {
                     yield return new Token(entry.Type, words[i], entry.Canonical, i);
+                    i++;
+                    continue;
                 }
-                else
-                {
-                    throw new ParseException($"Unknown word: {words[i]}");
-                }
+                
+                throw new ParseException($"Unknown word: {words[i]}");
             }
 
             yield return new Token(TokenType.EOF, string.Empty, string.Empty, words.Length);

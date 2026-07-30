@@ -17,6 +17,7 @@ namespace Rooms
             // AddChoice("use bed");
 
             AddItem(new BasicKey());
+            AddItem(new Note12());
         }
 
         public override Return Activate() => new Return(Description);
@@ -57,7 +58,8 @@ namespace Rooms
         private Return CheckHay()
         {
             UnregisterHandler(new Command("check", "hay"));
-            return new Return("Looking through the pile of hay, you find a small note.\n-Note 1 added to Inventory-");
+            CollectItem<Note12>();
+            return new Return("Looking through the pile of hay, you find a small note.");
         }
     }
 }

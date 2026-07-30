@@ -19,7 +19,28 @@ public class Inventory : Singleton<Inventory>, IState
         {
             return new Return("Closing inventory...", previous: true);
         }
+        else if (command.Verb == "check")
+        {
+            return ExamineItem(command);
+        }
         throw new CommandException("--Unknown Command--");
+    }
+
+    private Return ExamineItem(Command command)
+    {
+        // Build the item name
+        string searchName = command.Adjective is null ? command.Noun :
+        $"{command.Adjective} {command.Noun}";
+
+        IItem? item = _storage.FirstOrDefault(i => 
+            string.Equals(i.ItemName, searchName, StringComparison.OrdinalIgnoreCase));
+        
+        if (item == null)
+        {
+            return new Return($"-No {searchName} in your inventory-");
+        }
+
+        return new Return($"{item.ItemName}\n{item.Description}");
     }
 
     public Return Activate()
