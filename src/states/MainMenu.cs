@@ -9,7 +9,7 @@ public class MainMenu : IState
     {
         if (command.Verb == "start" && command.Noun == "game")
         {
-            return new Return("\nBeginning your journey into Ocura...", Testing.TestRoom.Get);
+            return new Return("\nBeginning your journey into Ocura...", Rooms.Room1.Get);
         }
         return new Return("--Unknown Command--");
     }

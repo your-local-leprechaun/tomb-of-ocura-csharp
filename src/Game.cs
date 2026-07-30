@@ -7,7 +7,9 @@ namespace Main
 {
     public class Game
     {
-        IState _activeState = new MainMenu();
+        // IState _activeState = new MainMenu();
+        IState _activeState = Rooms.Room1.Get;
+        IState? _previousState = null;
         Parser.Parser parser = new Parser.Parser();
         Frontend.Display Display = new Frontend.Display();
 
@@ -44,7 +46,18 @@ namespace Main
                     // Update state if needed
                     if (response.UpdateState != null)
                     {
+                        _previousState = _activeState;
                         _activeState = response.UpdateState;
+                        response = _activeState.Activate();
+                        Display.Render(response.Message);
+                    }
+                    
+                    // Return to Previous State
+                    if (response.Previous == true && _previousState != null)
+                    {
+                        var temp = _activeState;
+                        _activeState = _previousState;
+                        _previousState = temp;
                         response = _activeState.Activate();
                         Display.Render(response.Message);
                     }

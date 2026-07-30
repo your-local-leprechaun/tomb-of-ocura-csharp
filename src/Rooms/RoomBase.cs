@@ -11,9 +11,9 @@ namespace Rooms
         where T : RoomBase<T>
     {
         // Singleton Information
-        private RoomBase() {}
+        protected RoomBase() {}
 
-        protected static T Get => Instance;
+        public static T Get => Instance;
 
         // State Information
         public Return Execute(Command command)
@@ -23,6 +23,21 @@ namespace Rooms
             {
                 // Show the description again.
                 return new Return(Description);
+            }
+            else if (command.Verb == "open" && command.Noun == "inventory")
+            {
+                // Open the Inventory
+                return new Return("Opening inventory...", Inventory.Get);
+            }
+            else if (command.Verb == "show" && command.Noun == "choices")
+            {
+                string choiceString = "";
+                foreach (string choice in Choices)
+                {
+                    choiceString += $"\n{choice}";
+                }
+
+                return new Return (choiceString);
             }
 
             // Custom Choices
@@ -64,6 +79,11 @@ namespace Rooms
         protected void RemoveChoice(string removeChoice)
         {
             Choices.Remove(removeChoice);
+        }
+
+        protected bool ContainsChoice(string choice)
+        {
+            return Choices.Contains(choice);
         }
 
         protected void AddItem(IItem item)

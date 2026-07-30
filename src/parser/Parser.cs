@@ -1,6 +1,5 @@
 using Tokens;
 using Commands;
-using System.Runtime.InteropServices;
 
 namespace Parser
 {
@@ -23,6 +22,13 @@ namespace Parser
             { "sword", (TokenType.NOUN, "sword") },
             { "state", (TokenType.NOUN, "state") },
             { "game", (TokenType.NOUN, "game") },
+            { "inventory", (TokenType.NOUN, "inventory") },
+            { "room", (TokenType.NOUN, "room") },
+            { "key", (TokenType.NOUN, "key") },
+            { "choices", (TokenType.NOUN, "choices") },
+            { "door", (TokenType.NOUN, "door") },
+            { "north", (TokenType.NOUN, "north") },
+            { "hay", (TokenType.NOUN, "hay") },
 
 
             // Adjectives
@@ -33,11 +39,16 @@ namespace Parser
             { "exit", (TokenType.VERB, "exit") },
             { "quit", (TokenType.VERB, "exit") },
             { "start", (TokenType.VERB, "start") },
+            { "move", (TokenType.VERB, "move") },
             { "grab", (TokenType.VERB, "grab") },
             { "get", (TokenType.VERB, "grab") },
             { "walk", (TokenType.VERB, "go") },
             { "go", (TokenType.VERB, "go") },
             { "switch", (TokenType.VERB, "switch") },
+            { "check", (TokenType.VERB, "check") },
+            { "open", (TokenType.VERB, "open") },
+            { "close", (TokenType.VERB, "close") },
+            { "show", (TokenType.VERB, "show") },
 
             // Fillers
             { "the", (TokenType.FILLER, "the") },
