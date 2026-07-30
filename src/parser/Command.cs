@@ -1,10 +1,17 @@
 
 namespace Commands
 {
-    public class Command
+    public record Command
     {
-        public required string Verb { get; init; }
+        public string Verb { get; init; }
         public string? Adjective { get; init; }
-        public required string Noun { get; init; }
+        public string Noun { get; init; }
+
+        public Command(string verb, string noun, string? adjective = null)
+        {
+            Verb = verb;
+            Adjective = adjective;
+            Noun = noun;
+        }
     }
 }

@@ -49,6 +49,7 @@ namespace Parser
             { "open", (TokenType.VERB, "open") },
             { "close", (TokenType.VERB, "close") },
             { "show", (TokenType.VERB, "show") },
+            { "status", (TokenType.VERB, "status") },
 
             // Fillers
             { "the", (TokenType.FILLER, "the") },
@@ -116,7 +117,7 @@ namespace Parser
                 {
                     throw new ParseException("Did you mean just 'exit'?");
                 }
-                return new Command{ Verb = verb, Adjective = string.Empty, Noun = string.Empty};
+                return new Command(verb, string.Empty);
             }
 
             // Optional ADJECTIVE
@@ -141,7 +142,7 @@ namespace Parser
                 throw new ParseException($"Unexpected words after '{noun}'");
             }
 
-            return new Command { Verb = verb, Adjective = adjective, Noun = noun};
+            return new Command(verb, noun, adjective);
         }
     }
 }
