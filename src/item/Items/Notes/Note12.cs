@@ -8,11 +8,9 @@ namespace Items
 
         public Note12()
         {
-            Description = """
-                        How were we supposed to know? They told us he 
-                        was evil and we trusted them. It was them all 
-                        along.\n\nThere's no way out for us...
-                        """;
+            Description = "'How were we supposed to know? They told us he " +
+                        "was evil and we trusted them. It was them all " +
+                        "along.\nThere's no way out for us...'";
             Type = ItemType.Misc;
             ItemName = "Note #12";
 

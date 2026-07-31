@@ -20,12 +20,10 @@ namespace Rooms
             AddItem(new Note12());
         }
 
-        public override Return Activate() => new Return(Description);
-
         private Return GrabKey()
         {
             UpdateDescription("You stand in a jail cell. There is a cell door in front of you and a bed behind you.");
-            
+
             CollectItem<BasicKey>();
             UnregisterHandler(new Command("grab", "key"));
 
@@ -52,11 +50,12 @@ namespace Rooms
         private Return MoveNorth()
         {
             // Move to Room 2
-            return new Return("You walk through the northern doorway.", new MainMenu());
+            return new Return("You walk through the northern doorway.", Room2.Get);
         }
 
         private Return CheckHay()
         {
+            UpdateDescription("You are in a brick room with an opened jail cell. There is a bed in the cell and a room to the north.");
             UnregisterHandler(new Command("check", "hay"));
             CollectItem<Note12>();
             return new Return("Looking through the pile of hay, you find a small note.");

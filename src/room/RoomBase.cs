@@ -40,7 +40,7 @@ namespace Rooms
 
         public virtual Return Activate()
         {
-            return new Return("Room is not setup");
+            return new Return(RoomName + "\n" + Description);
         }
 
         // Room Information
@@ -52,6 +52,7 @@ namespace Rooms
         protected void RegisterHandler(Command command, Func<Return> handler, bool showChoice = true, string? displayText = null)
         {
             _handlers[command] = handler;
+            Parser.Parser.RegisterNoun(command.Noun);
             if (showChoice)
             {
                 AddChoice(displayText ?? $"{command.Verb} {command.Noun}");
