@@ -31,5 +31,13 @@ namespace Stats
         public void Increase(StatType stat, int amount = 1) => _stats[stat] += amount;
 
         public IReadOnlyDictionary<StatType, int> All => _stats;
+
+        public string Status()
+        {
+            var lines = Enum.GetValues<StatType>()
+                .Select(stat => $"  {stat}: {Get(stat)}");
+
+            return "Stats:\n" + string.Join('\n', lines) + '\n';
+        }
     }
 }

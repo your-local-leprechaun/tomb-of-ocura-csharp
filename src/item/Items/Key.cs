@@ -1,18 +1,14 @@
 
 namespace Items
 {
-    public class BasicKey : IItem
+    public class BasicKey : ItemBase
     {
-        public string Description { get; init; }
-        public ItemType Type { get; init; }
-        public string ItemName { get; init; }
-
-        public BasicKey()
+        public BasicKey() : base(
+            "Basic Key",
+            "A basic key. It's nothing special.",
+            ItemType.Misc
+        )
         {
-            Description = "A basic key.";
-            Type = ItemType.Misc;
-            ItemName = "Basic Key";
-
             Parser.Parser.RegisterNoun("Key");
             Parser.Parser.RegisterAdjective("Basic");
         }

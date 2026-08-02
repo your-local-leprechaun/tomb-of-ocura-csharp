@@ -28,6 +28,7 @@ namespace Parser
             { "door", (TokenType.NOUN, "door") },
             { "north", (TokenType.NOUN, "north") },
             { "hay", (TokenType.NOUN, "hay") },
+            { "player", (TokenType.NOUN, "player") },
 
 
             // Adjectives
@@ -53,6 +54,8 @@ namespace Parser
             { "status", (TokenType.VERB, "status") },
             { "fix", (TokenType.VERB, "fix") },
             { "straighten", (TokenType.VERB, "fix") },
+            { "equip", (TokenType.VERB, "equip") },
+            { "unequip", (TokenType.VERB, "unequip") },
 
             // Fillers
             { "the", (TokenType.FILLER, "the") },

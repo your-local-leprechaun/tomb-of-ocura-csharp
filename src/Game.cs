@@ -30,15 +30,24 @@ namespace Main
                 {
                     Command command = parser.ParseInput(input);
 
+                    Return response;
+
                     // Check for basic commands (Exit)
                     if (command.Verb == "exit")
                     {
                         Quit();
                         continue;
                     }
-
-                    // Call command to the active state, and recieve information back
-                    Return response = _activeState.Execute(command);
+                    else if (command.Verb == "status" && command.Noun == "player")
+                    {
+                        Player player = Player.Get;
+                        response = player.Status();
+                    }
+                    else
+                    {
+                        // Call command to the active state, and recieve information back
+                        response = _activeState.Execute(command);
+                    }
 
                     // Display message
                     Display.Render(response.Message);
@@ -51,7 +60,7 @@ namespace Main
                         response = _activeState.Activate();
                         Display.Render(response.Message);
                     }
-                    
+
                     // Return to Previous State
                     if (response.Previous == true && _previousState != null)
                     {

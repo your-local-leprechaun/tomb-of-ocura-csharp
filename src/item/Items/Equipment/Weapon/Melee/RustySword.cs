@@ -1,20 +1,26 @@
 
 namespace Items.Equipment
 {
-    public class RustySword : IEquipment
+    public class RustySword : EquipmentBase, IMelee
     {
-        public string Description { get; init; }
-        public ItemType Type { get; init; }
-        public string ItemName { get; init; }
-
-        public RustySword()
+        public RustySword() : base (
+            "An old, rusty sword. It doesn't look powerful.",
+            "Rusty Sword",
+            EquipType.Melee
+        )
         {
-            Description = "A old, rusty sword. It doesn't look powerful.";
-            Type = ItemType.Equipment;
-            ItemName = "Rusty Sword";
-
             Parser.Parser.RegisterNoun("Sword");
             Parser.Parser.RegisterAdjective("Rusty");
+        }
+
+        public bool Swing()
+        {
+            return true;
+        }
+
+        public int Damage()
+        {
+            return 5;
         }
     }
 }

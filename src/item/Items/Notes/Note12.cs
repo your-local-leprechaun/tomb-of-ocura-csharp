@@ -1,19 +1,15 @@
 namespace Items
 {
-    class Note12 : IItem
+    class Note12 : ItemBase
     {
-        public string Description { get; init; }
-        public ItemType Type { get; init; }
-        public string ItemName { get; init; }
-
-        public Note12()
+        public Note12() : base(
+            "Note #12",
+            "'How were we supposed to know? They told us he " +
+            "was evil and we trusted them. It was them all " +
+            "along.\nThere's no way out for us...'",
+            ItemType.Misc
+        )
         {
-            Description = "'How were we supposed to know? They told us he " +
-                        "was evil and we trusted them. It was them all " +
-                        "along.\nThere's no way out for us...'";
-            Type = ItemType.Misc;
-            ItemName = "Note #12";
-
             Parser.Parser.RegisterNoun("Note #12");
         }
     }
