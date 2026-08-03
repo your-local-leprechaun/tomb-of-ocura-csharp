@@ -1,15 +1,29 @@
 
 using Stats;
-using Basic;
 using Returns;
+using Combatants;
 
-public class Player : Singleton<Player>
+public class Player : CombatantBase
 {
-    private Player() {}
+    private static Player? instance;
+    private static Player Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = (Player)Activator.CreateInstance(typeof(Player), nonPublic: true)!;
+            }
+            return instance;
+        }
+    }
 
     public static Player Get => Instance;
 
-    public string Name { get; init; } = "Jayme";
+    private Player() : base(
+        "Jaymie",
+        10
+    ) {}
 
     public StatManager Stats { get; } = new(new Dictionary<StatType, int>
     {

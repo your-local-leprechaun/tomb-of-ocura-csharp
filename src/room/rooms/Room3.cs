@@ -58,7 +58,7 @@ namespace Rooms
         }
         private Return MoveSouth()
         {
-            return new Return("You walk through the red door.");
+            return new Return("You walk through the red door.", Room4.Get);
         }
         private Return FixPainting()
         {

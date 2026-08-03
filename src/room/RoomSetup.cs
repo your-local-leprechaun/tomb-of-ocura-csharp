@@ -1,15 +1,20 @@
-using Basic;
 using Commands;
 using Items;
-using Parser;
 using Returns;
+using Basic;
+using Parser;
 using State;
-
-
 using System.Text;
 
 namespace Rooms
 {
+    public interface IRoom
+    {
+        string Description { get; }
+        List<string> Choices { get; }
+        List<IItem> Items { get; }
+    }
+
     public class RoomBase<T> : Singleton<T>, IState, IRoom
         where T : RoomBase<T>
     {
