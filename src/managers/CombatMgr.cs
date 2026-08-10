@@ -7,22 +7,43 @@ class CombatManager : IState
 {
     public Return Execute(Command command)
     {
-        return new Return("Entering Combat!");
+        string tempName = _combatants[_initiative].Name;
+        NextTurn();
+        return new Return($"It's {tempName}'s turn!");
     }
 
     public Return Activate()
     {
-        return new Return("You are now entering combat.");
+        string response = string.Join(", ", _combatants.Select(c => c.Name));
+        return new Return($"Entering Combat!\nFighters: {response}");
     }
 
-    private List<CombatantBase> _combatants = new();
+    private List<ICombatant> _combatants = new();
+    private int _initiative = 0;
 
-    public CombatManager(List<CombatantBase> enemies)
+    public CombatManager(List<ICombatant> enemies)
     {
-        foreach (CombatantBase enemy in enemies)
+        foreach (ICombatant enemy in enemies)
         {
             _combatants.Add(enemy);
         }
         _combatants.Add(Player.Get);
+    }
+
+    private void NextTurn()
+    {
+        _initiative++;
+        if (_initiative > _combatants.Count - 1)
+        {
+            _initiative = 0;
+        }
+    }
+
+    /// <summary>
+    /// Reorganize _combatants based on stat Vitalitys
+    /// </summary>
+    private void ReorderCombatants()
+    {
+        _combatants.Sort((x, y) => x.Stat)
     }
 }

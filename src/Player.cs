@@ -3,7 +3,7 @@ using Stats;
 using Returns;
 using Combatants;
 
-public class Player : CombatantBase
+public class Player : CombatantBase, ICombatant
 {
     private static Player? instance;
     private static Player Instance

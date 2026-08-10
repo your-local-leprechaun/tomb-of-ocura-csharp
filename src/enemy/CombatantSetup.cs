@@ -1,6 +1,7 @@
 
 using Commands;
 using Returns;
+using Stats;
 
 namespace Combatants
 {
@@ -11,6 +12,7 @@ namespace Combatants
         int CurrHealth { get; }
         void Damage(int damage);
         void Heal(int damage);
+
         //StatusManager in the future
 
         Return TakeAction(Command? command = null);
@@ -28,6 +30,8 @@ namespace Combatants
         public string Name { get; set; }
         public int MaxHealth { get; set; }
         public int CurrHealth { get; set; }
+
+        public StatManager Stats { get; set; }
 
         public void Damage(int damage)
         {

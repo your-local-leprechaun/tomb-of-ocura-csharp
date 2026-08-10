@@ -7,10 +7,11 @@ namespace Rooms
 {
     public class Room3 : RoomBase<Room3>
     {
-        private Room3()
+        private Room3() : base(
+            "Painting Room",
+            ""
+        )
         {
-            RoomName = "Painting Room";
-
             RebuildDescription();
 
             // OG Choices
@@ -54,7 +55,7 @@ namespace Rooms
         }
         private Return MoveEast()
         {
-            return new Return("You walk into the secret passageway.");
+            return new Return("You walk into the secret passageway.", SecretPassage1.Get);
         }
         private Return MoveSouth()
         {

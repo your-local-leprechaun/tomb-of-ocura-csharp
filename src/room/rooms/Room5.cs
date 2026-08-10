@@ -1,14 +1,15 @@
 using Commands;
+using Enemies;
 using Items;
 using Returns;
 
 namespace Rooms
 {
-    public class RoomExample : RoomBase<RoomExample>
+    public class Room5 : RoomBase<Room5>
     {
-        private RoomExample() : base(
-            "Room Name",
-            "Room description"
+        private Room5() : base(
+            "Armory",
+            "A room that was once an armory, there are pieces of armor on many manaquins, with a few other pieces laying about. The only piece that looks to fit you is a rusty breastplate. To the south is the hallway. To the east is a room."
         )
         {
             // Add OG Choices
@@ -16,6 +17,9 @@ namespace Rooms
 
             // Add OG Items
             // AddItem(new BasicKey());
+
+            // Add Enemies
+            AddEnemy(new Slime("Slime"));
         }
 
         // Custom Choice Methods

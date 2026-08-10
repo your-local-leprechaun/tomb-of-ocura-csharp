@@ -5,6 +5,8 @@ using Basic;
 using Parser;
 using State;
 using System.Text;
+using Enemies;
+using Combatants;
 
 namespace Rooms
 {
@@ -21,8 +23,12 @@ namespace Rooms
         private readonly Dictionary<Command, Func<Return>> _handlers = new();
 
         // Singleton Information
-        protected RoomBase()
+        protected RoomBase(string roomName, string description)
         {
+            RoomName = roomName;
+            Description = description;
+            
+            // Shared Choices
             RegisterHandler(new Command("show", "room"), () => new Return(Description), showChoice: false);
             RegisterHandler(new Command("open", "inventory"), () => new Return("Opening Inventory...", Inventory.Get), showChoice: false);
             RegisterHandler(new Command("check", "choices"), () => new Return(string.Join("\n", Choices)), showChoice: false);
@@ -45,6 +51,14 @@ namespace Rooms
 
         public virtual Return Activate()
         {
+            // If Enemies are in the room, start a battle.
+            if (Enemies.Count > 0)
+            {
+                // Start a Combat instance with Enemies
+                return new Return($"Enter {RoomName}, you enter a fight!", new CombatManager(Enemies));
+            }
+
+            // Else Return the normal description stuff.
             return new Return(RoomName + "\n" + Description);
         }
 
@@ -53,6 +67,7 @@ namespace Rooms
         public string Description { get; private set; } = "";
         public List<string> Choices { get; private set; } = [];
         public List<IItem> Items { get; private set; } = [];
+        public List<ICombatant> Enemies { get; private set; } = [];
 
         protected void RegisterHandler(Command command, Func<Return> handler, bool showChoice = true, string? displayText = null)
         {
@@ -123,6 +138,16 @@ namespace Rooms
 
             // Remove from room
             RemoveItem(item);
+        }
+
+        protected void AddEnemy(ICombatant enemy)
+        {
+            Enemies.Add(enemy);
+        }
+
+        protected void RemoveEnemy(IEnemy enemy)
+        {
+            // Code here at some point that's for sure.
         }
 
         private Return RoomVitals()

@@ -8,7 +8,7 @@ namespace Main
     public class Game
     {
         // IState _activeState = new MainMenu();
-        IState _activeState = Rooms.Room3.Get;
+        IState _activeState = Rooms.Room5.Get;
         IState? _previousState = null;
         Parser.Parser parser = new Parser.Parser();
         Frontend.Display Display = new Frontend.Display();
@@ -52,8 +52,9 @@ namespace Main
                     // Display message
                     Display.Render(response.Message);
 
-                    // Update state if needed
-                    if (response.UpdateState != null)
+                    // Update state if needed (loop in case Activate() itself
+                    // triggers another transition, e.g. entering a room with enemies)
+                    while (response.UpdateState != null)
                     {
                         _previousState = _activeState;
                         _activeState = response.UpdateState;
@@ -88,6 +89,12 @@ namespace Main
         {
             Return response = _activeState.Activate();
             Display.Render(response.Message);
+            if (response.UpdateState is not null)
+            {
+                _activeState = response.UpdateState;
+                response = _activeState.Activate();
+                Display.Render(response.Message);
+            }
 
             GameLoop();
         }

@@ -6,12 +6,11 @@ namespace Rooms
 {
     public class Room4 : RoomBase<Room4>
     {
-        private Room4()
+        private Room4() : base(
+            "Treasure Room",
+            "The well lit room contains a chest, that sits unopened on the south wall in front of two wall torches. To the north is the Painting Room."
+        )
         {
-            RoomName = "Treasure Room ";
-
-            UpdateDescription("The well lit room contains a chest, that sits unopened on the south wall in front of two wall torches. To the north is the Painting Room.");
-
             // OG Choices
             RegisterHandler(new Command("move", "north"), MoveNorth);
             RegisterHandler(new Command("open", "chest"), OpenChest);

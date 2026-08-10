@@ -17,3 +17,8 @@ namespace Basic
         }
     }
 }
+
+public readonly record struct Range(int Min, int Max)
+{
+    public int Roll(Random rng) => rng.Next(Min, Max + 1);
+}

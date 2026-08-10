@@ -6,14 +6,15 @@ namespace Rooms
 {
     public class Room1 : RoomBase<Room1>
     {
-        private Room1()
+        private Room1() : base
+        (
+            "Jail Cell",
+            "You awake in a jail cell. There is a cell door in front of you and a key on the floor next to the bed."
+        )
         {
-            RoomName = "Jail Cell";
-
-            UpdateDescription("You awake in a jail cell. There is a cell door in front of you and a key on the floor next to the bed.");
-
             RegisterHandler(new Command("grab", "key"), GrabKey);
             RegisterHandler(new Command("open", "door"), OpenDoor);
+            
             // AddChoice("use bed");
 
             AddItem(new BasicKey());

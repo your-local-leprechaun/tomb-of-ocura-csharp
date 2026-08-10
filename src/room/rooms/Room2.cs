@@ -6,10 +6,11 @@ namespace Rooms
 {
     public class Room2 : RoomBase<Room2>
     {
-        private Room2()
+        private Room2() : base(
+            "Symbol Room",
+            ""
+        )
         {
-            RoomName = "Symbol Room";
-
             RebuildDescription();
 
             // OG Choices
@@ -29,7 +30,7 @@ namespace Rooms
         {
             { "symbol", "a symbol drawn in blood" },
             { "candles", "unlit candles" },
-            { "eastExit", "a room" },
+            { "eastExit", "a hallway" },
             { "northExit", "a room" }
         };
 
@@ -55,7 +56,7 @@ namespace Rooms
         // Choice Methods
         private Return MoveNorth()
         {
-            return new Return("You walk to the north.", Room2.Get);
+            return new Return("You walk to the north.", Hallway1.Get);
         }
         private Return MoveEast()
         {

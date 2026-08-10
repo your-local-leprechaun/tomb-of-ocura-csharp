@@ -137,7 +137,7 @@ namespace Parser
             // Starts with VERB
             if (tokens[i].Type != TokenType.VERB)
             {
-                throw new ParseException($"Expected a verb, got unknown word'{tokens[i].Value}'");               
+                throw new ParseException($"Expected a verb, got unknown word '{tokens[i].Value}'");               
             }
             string verb = tokens[i].Canonical;
             i ++;
