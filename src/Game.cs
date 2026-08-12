@@ -24,8 +24,6 @@ namespace Main
                 // Get Player input
                 string input = Display.Input();
 
-                // Parse the command into a command that follows the order of
-                // VERB [ADJECTIVE] NOUN
                 try
                 {
                     Command command = parser.ParseInput(input);
@@ -89,7 +87,8 @@ namespace Main
         {
             Return response = _activeState.Activate();
             Display.Render(response.Message);
-            if (response.UpdateState is not null)
+
+            while (response.UpdateState is not null)
             {
                 _activeState = response.UpdateState;
                 response = _activeState.Activate();

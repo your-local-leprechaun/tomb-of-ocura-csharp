@@ -56,6 +56,9 @@ namespace Parser
             { "straighten", (TokenType.VERB, "fix") },
             { "equip", (TokenType.VERB, "equip") },
             { "unequip", (TokenType.VERB, "unequip") },
+            { "attack", (TokenType.VERB, "attack") },
+            { "swing", (TokenType.VERB, "attack") },
+            { "melee", (TokenType.VERB, "attack") },
 
             // Fillers
             { "the", (TokenType.FILLER, "the") },

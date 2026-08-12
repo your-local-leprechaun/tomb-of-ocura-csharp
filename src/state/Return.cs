@@ -8,10 +8,8 @@ namespace Returns
         public State.IState? UpdateState { get; init; } = null;
 
         public bool? Previous { get; init; } = null;
-        
-        public bool? ContinueOption { get; init; } = null;
 
-        public Return (string message, State.IState? state = null, bool? previous = null, bool? cont = null)
+        public Return (string message, State.IState? state = null, bool? previous = null)
         {
             Message = message;
             if (state != null)
@@ -21,10 +19,6 @@ namespace Returns
             if (previous != null)
             {
                 Previous = previous;
-            }
-            if (cont != null)
-            {
-                ContinueOption = cont;
             }
         } 
     }

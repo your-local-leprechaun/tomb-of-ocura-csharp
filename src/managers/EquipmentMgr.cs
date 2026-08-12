@@ -1,10 +1,10 @@
 using Items.Equipment;
 
-public class EquipmentMgr
+public class EquipmentManager
 {
     private readonly Dictionary<EquipType, IEquipment?> _equippedItems;
 
-    public EquipmentMgr(Dictionary<EquipType, IEquipment?>? initial = null)
+    public EquipmentManager(Dictionary<EquipType, IEquipment?>? initial = null)
     {
         _equippedItems = Enum.GetValues<EquipType>()
             .ToDictionary(slot => slot, slot => initial?.GetValueOrDefault(slot));
@@ -35,5 +35,10 @@ public class EquipmentMgr
     public bool Equipped(IEquipment item, EquipType slot)
     {
         return _equippedItems[slot]?.GetType() == item.GetType();
+    }
+
+    public IEquipment? EquippedSlot(EquipType slot)
+    {
+        return _equippedItems[slot];
     }
 }

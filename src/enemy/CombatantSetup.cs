@@ -10,28 +10,33 @@ namespace Combatants
         string Name { get; }
         int MaxHealth { get; }
         int CurrHealth { get; }
+        StatManager Stats { get; }
+        EquipmentManager Equipment { get; }
         void Damage(int damage);
         void Heal(int damage);
 
         //StatusManager in the future
 
-        Return TakeAction(Command? command = null);
+        Return TakeAction();
     }
 
     public class CombatantBase
     {
-        public CombatantBase(string name, int maxHealth)
+        public CombatantBase(string name, int maxHealth, IDictionary<StatType, int>? initialStats = null)
         {
             Name = name;
             MaxHealth = maxHealth;
             CurrHealth = MaxHealth;
+            Stats = new StatManager(initialStats);
+            Equipment = new EquipmentManager();
         }
 
         public string Name { get; set; }
         public int MaxHealth { get; set; }
         public int CurrHealth { get; set; }
 
-        public StatManager Stats { get; set; }
+        public StatManager Stats { get; }
+        public EquipmentManager Equipment { get; }
 
         public void Damage(int damage)
         {
@@ -43,9 +48,9 @@ namespace Combatants
             CurrHealth += healAmmount;
         }
 
-        public virtual Return TakeAction(Command? command = null)
+        public virtual Return TakeAction()
         {
-            return new Return($"{nameof(CombatantBase)}'s turn");
+            return new Return($"{Name}'s turn");
         }
     }   
 }

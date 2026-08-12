@@ -13,9 +13,9 @@ namespace Frontend
         /// will add more once we switch up display methods.
         /// </summary>
         /// <param name="message">String that will be displayed as main message after action</param>
-        public void Render(string message)
+        public void Render(string message, string end = "\n")
         {
-            PrintOut(message);
+            PrintOut(message + end);
         }
 
         public string Input()
@@ -47,7 +47,6 @@ namespace Frontend
                 Console.Write(c);
                 Thread.Sleep(sleep);
             }
-            Console.WriteLine();
         }
     }
 }

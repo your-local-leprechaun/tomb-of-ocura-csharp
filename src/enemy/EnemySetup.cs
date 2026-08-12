@@ -1,4 +1,7 @@
 using Combatants;
+using Commands;
+using Returns;
+using Stats;
 
 namespace Enemies
 {
@@ -13,18 +16,27 @@ namespace Enemies
         public string Description { get; init; }
         public int Level { get; init; } = 1;
 
-        public EnemyBase(string name, int maxHealth, string description, int level) : base(
-            name,
-            maxHealth
-        )
+        public EnemyBase(
+            string name,
+            int maxHealth,
+            string description,
+            int level,
+            IDictionary<StatType, int> initialStats
+        ) : base(name, maxHealth, initialStats)
         {
             Level = level;
             Description = description;
+            Parser.Parser.RegisterNoun(name);
         }
 
         public string Status()
         {
-            return $"{Name}\n{CurrHealth}/{MaxHealth}\n{Description}";
+            return $"{Name}\n{Level}\n{CurrHealth}/{MaxHealth}\n{Description}";
+        }
+
+        public override Return TakeAction()
+        {
+            return new Return($"{Name} takes their turn");
         }
     }
 }

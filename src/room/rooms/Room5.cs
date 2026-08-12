@@ -19,7 +19,8 @@ namespace Rooms
             // AddItem(new BasicKey());
 
             // Add Enemies
-            AddEnemy(new Slime("Slime"));
+            AddEnemy(new Slime("Slimey"));
+            AddEnemy(new Slime("Slimer", 16));
         }
 
         // Custom Choice Methods
