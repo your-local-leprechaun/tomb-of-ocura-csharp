@@ -2,31 +2,31 @@ using Items.Equipment;
 
 public class EquipmentManager
 {
-    private readonly Dictionary<EquipType, IEquipment?> _equippedItems;
+    public readonly Dictionary<EquipType, IEquipment?> EquippedItems;
 
-    public EquipmentManager(Dictionary<EquipType, IEquipment?>? initial = null)
+    public EquipmentManager(IDictionary<EquipType, IEquipment>? initial = null)
     {
-        _equippedItems = Enum.GetValues<EquipType>()
-            .ToDictionary(slot => slot, slot => initial?.GetValueOrDefault(slot));
+        EquippedItems = Enum.GetValues<EquipType>()
+            .ToDictionary(slot => slot, slot => initial != null && initial.TryGetValue(slot, out var equipped) ? equipped : null);
     }
 
     public void EquipItem(EquipType type, IEquipment equipment)
     {
-        _equippedItems[type]?.Unequip();
-        _equippedItems[type] = equipment;
+        EquippedItems[type]?.Unequip();
+        EquippedItems[type] = equipment;
     }
 
     public void UnequipItem(EquipType type, IEquipment equipment)
     {
-        if (_equippedItems.TryGetValue(type, out var equipped) && equipped == equipment)
+        if (EquippedItems.TryGetValue(type, out var equipped) && equipped == equipment)
         {
-            _equippedItems[type] = null;
+            EquippedItems[type] = null;
         }
     }
 
     public string Status()
     {
-        var lines = _equippedItems.Select(slot =>
+        var lines = EquippedItems.Select(slot =>
             $"  {slot.Key}: {(slot.Value is null ? "(empty)" : slot.Value.ItemName)}");
 
         return "Equipment:\n" + string.Join('\n', lines) + "\n";
@@ -34,11 +34,11 @@ public class EquipmentManager
 
     public bool Equipped(IEquipment item, EquipType slot)
     {
-        return _equippedItems[slot]?.GetType() == item.GetType();
+        return EquippedItems[slot]?.GetType() == item.GetType();
     }
 
     public IEquipment? EquippedSlot(EquipType slot)
     {
-        return _equippedItems[slot];
+        return EquippedItems[slot];
     }
 }

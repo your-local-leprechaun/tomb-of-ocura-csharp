@@ -5,9 +5,11 @@ using Combatants;
 using Commands;
 using Parser;
 using Enemies;
+using Items.Equipment;
 
 public class Player : CombatantBase, ICombatant
 {
+    public int PlayerExperience = 0;
     private static Player? instance;
     private static Player Instance
     {
@@ -26,6 +28,7 @@ public class Player : CombatantBase, ICombatant
     private Player() : base(
         "Jaymie",
         10,
+        0,
         new Dictionary<StatType, int>
         {
             { StatType.Might, 12},
@@ -33,19 +36,24 @@ public class Player : CombatantBase, ICombatant
             { StatType.Fortitude, 12},
             { StatType.Vitality, 12},
             { StatType.Chance, 12},
+        },
+        new Dictionary<EquipType, IEquipment>
+        {
+            // Debug gear for testing combat without walking to the item each run.
+            { EquipType.Melee, new MeleeBase("Debug Sword", "A sword for debuggers", 99, 3, 5) { IsEquipped = true } },
         }
     )
     { }
 
     public Return Status()
     {
-        string returnStr = $"{Name} (Player)\n";
+        List<string> ReturnString = [];
+        ReturnString.Add($"{Name} (Player)");
+        ReturnString.Add($"XP: {PlayerExperience}");
+        ReturnString.Add(Stats.Status());
+        ReturnString.Add(Equipment.Status());
 
-        returnStr += Stats.Status();
-
-        returnStr += Equipment.Status();
-
-        return new Return(returnStr);
+        return new Return(string.Join("\n", ReturnString));
     }
 
     public Return PlayerAction(Command command, List<ICombatant> combatants)
@@ -60,7 +68,34 @@ public class Player : CombatantBase, ICombatant
                 throw new CommandException("--Unknown Target--");
             }
 
-            return new Return($"Player attacks {enemy.Name} with {Equipment.EquippedSlot(Items.Equipment.EquipType.Melee)?.ItemName ?? "fists"}");
+            // Enemy is in target range! Try to hit, and then damage if we do hit! This is for melee only
+            // First, let's grab our melee weapon object, or use the fist objects if needed.
+            IEquipment? equipped = Equipment.EquippedSlot(EquipType.Melee);
+            IMelee weapon = equipped as IMelee ?? new Fist();
+
+            // Now that we have our melee weapon, let's swing to see if we hit the creature.
+            if (!(weapon.TryHit() || _hold))
+            {
+                return new Return($"Player misses {enemy.Name} using {weapon.ItemName}");
+            }
+            _hold = false;
+
+            // Roll damage, and pass to enemy. Then recieve how much damage we actually did and what health the enemy is now at.
+            int damage = weapon.CalcDamage();
+            int dealtDamage = enemy.Damage(damage);
+
+            if (enemy.CurrHealth <= 0)
+            {
+                PlayerExperience += enemy.Experience;
+                return new Return($"Player kills {enemy.Name}. {enemy.Experience}xp gained.");
+            }
+
+            return new Return($"Player hits {enemy.Name} for {dealtDamage}\n{enemy.Name} HP({enemy.CurrHealth}/{enemy.MaxHealth})");
+        }
+        else if (command.Verb == "hold")
+        {
+            Hold();
+            return new Return($"Player preps for their next attack.");
         }
 
         throw new CommandException("--Unknown Command--");

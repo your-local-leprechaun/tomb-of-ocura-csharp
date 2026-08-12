@@ -13,25 +13,19 @@ namespace Rooms
         )
         {
             // Add OG Choices
-            // RegisterHandler(new Command("grab", "key"), GrabKey);
+            RegisterHandler(new Command("move", "south"), MoveSouth);
 
             // Add OG Items
             // AddItem(new BasicKey());
 
             // Add Enemies
             AddEnemy(new Slime("Slimey"));
-            AddEnemy(new Slime("Slimer", 16));
         }
 
         // Custom Choice Methods
-        // private Return GrabKey()
-        // {
-        //     UpdateDescription("You stand in a jail cell. There is a cell door in front of you and a bed behind you.");
-
-        //     CollectItem<BasicKey>();
-        //     UnregisterHandler(new Command("grab", "key"));
-
-        //     return new Return("You pickup the key");
-        // }
+        private Return MoveSouth()
+        {
+            return new Return("You walk down the long hallway.", Hallway1.Get);
+        }
     }
 }

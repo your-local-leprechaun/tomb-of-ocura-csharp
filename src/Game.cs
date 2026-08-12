@@ -90,6 +90,7 @@ namespace Main
 
             while (response.UpdateState is not null)
             {
+                _previousState = _activeState;
                 _activeState = response.UpdateState;
                 response = _activeState.Activate();
                 Display.Render(response.Message);

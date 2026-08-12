@@ -28,6 +28,18 @@ class CombatManager : IState
 
             // Add to Return Message
             ReturnMessage.Add(result.Message);
+
+            CullEnemies();
+
+            // Check if only player is left (win condition)
+            if (_combatants.Count == 1)
+            {
+                // Defeated enemies are gone for good, so clear them from the room
+                // that spawned this fight or it'll trigger combat again on re-entry.
+                _roomEnemies.Clear();
+                ReturnMessage.Add("Player Wins!");
+                return new Return(string.Join("\n", ReturnMessage), previous: true);
+            }
             
             NextTurn();
 
@@ -44,13 +56,13 @@ class CombatManager : IState
                 // Otherwise, let's continue the loop
                 ReturnMessage.Add($"{enemy.Name}'s turn");
 
-                result = enemy.TakeAction();
+                result = enemy.TakeAction(_combatants);
                 ReturnMessage.Add(result.Message);
 
                 NextTurn();
             }
 
-            // Add player turn shown. Could add it as a 
+            // Add player turn shown. Could add it as a
             ReturnMessage.Add("Player's Turn");
 
             return new Return(string.Join("\n", ReturnMessage));
@@ -74,7 +86,7 @@ class CombatManager : IState
         while (enemy is not Player)
         {
             ReturnMessage.Add($"{enemy.Name}'s Turn");
-            Return response = enemy.TakeAction();
+            Return response = enemy.TakeAction(_combatants);
             ReturnMessage.Add(response.Message);
 
             NextTurn();
@@ -87,10 +99,12 @@ class CombatManager : IState
     }
 
     private List<ICombatant> _combatants = new();
+    private readonly List<ICombatant> _roomEnemies;
     private int _initiative = 0;
 
     public CombatManager(List<ICombatant> enemies)
     {
+        _roomEnemies = enemies;
         foreach (ICombatant enemy in enemies)
         {
             _combatants.Add(enemy);
@@ -116,5 +130,19 @@ class CombatManager : IState
         _combatants = _combatants
             .OrderByDescending(c => c.Stats.Get(StatType.Vitality))
             .ToList();
+    }
+
+    /// <summary>
+    /// Remove all enemies with health below or equal to 0
+    /// </summary>
+    private void CullEnemies()
+    {
+        ICombatant current = _combatants[_initiative];
+
+        _combatants.RemoveAll(enemy => enemy.CurrHealth <= 0 && enemy is not Player);
+
+        // Removing dead combatants can shift everyone's index, so re-find whoever's
+        // turn it currently is instead of trusting the old _initiative value.
+        _initiative = Math.Max(0, _combatants.IndexOf(current));
     }
 }

@@ -12,6 +12,7 @@ namespace Enemies
             new Range(2, 5).Roll(Random.Shared),
             "Description Here",
             1,
+            50,
             new Dictionary<StatType, int>
             {
                 { StatType.Might, 4},
@@ -23,9 +24,9 @@ namespace Enemies
         )
         { }
 
-        public override Return TakeAction()
+        protected override List<EnemyMove> Moves { get; } = new()
         {
-            return base.TakeAction();
-        }
+            new EnemyMove("Ooze", 100, 70, 1, 3),
+        };
     }
 }

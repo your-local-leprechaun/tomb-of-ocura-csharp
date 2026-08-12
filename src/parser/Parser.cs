@@ -59,6 +59,7 @@ namespace Parser
             { "attack", (TokenType.VERB, "attack") },
             { "swing", (TokenType.VERB, "attack") },
             { "melee", (TokenType.VERB, "attack") },
+            { "hold", (TokenType.VERB, "hold") },
 
             // Fillers
             { "the", (TokenType.FILLER, "the") },

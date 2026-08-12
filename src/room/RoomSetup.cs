@@ -54,8 +54,9 @@ namespace Rooms
             // If Enemies are in the room, start a battle.
             if (Enemies.Count > 0)
             {
+
                 // Start a Combat instance with Enemies
-                return new Return($"Enter {RoomName}, you enter a fight!", new CombatManager(Enemies));
+                return new Return($"Entering {RoomName}, you find a fight!", new CombatManager(Enemies));
             }
 
             // Else Return the normal description stuff.
@@ -143,11 +144,6 @@ namespace Rooms
         protected void AddEnemy(ICombatant enemy)
         {
             Enemies.Add(enemy);
-        }
-
-        protected void RemoveEnemy(IEnemy enemy)
-        {
-            // Code here at some point that's for sure.
         }
 
         private Return RoomVitals()
