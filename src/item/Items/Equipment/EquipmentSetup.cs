@@ -29,7 +29,7 @@ namespace Items.Equipment
 
         public override string GetInfo()
         {
-            return $"{ItemName}{(IsEquipped ? " *" : "")}\n{Description}";
+            return $"{ItemName}{(IsEquipped ? "*" : "")}\nType: {EquipSlot}\n{Description}";
         }
 
         public void Equip()

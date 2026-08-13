@@ -46,8 +46,7 @@ namespace Items.Equipment
 
         public override string GetInfo()
         {
-            return $"{ItemName}{(IsEquipped ? " *" : "")}\n{Description}\nHit Chance: {HitChance}%\nDamage: {MinDamage}-{MaxDamage}";
+            return $"{ItemName}{(IsEquipped ? "*" : "")}\n{Description}\nHit Chance: {HitChance}%\nDamage: {MinDamage}-{MaxDamage}";
         }
-
     }
 }

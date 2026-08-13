@@ -10,7 +10,7 @@ namespace Enemies
         public Slime(string name, int test = 4) : base(
             name,
             new Range(2, 5).Roll(Random.Shared),
-            "Description Here",
+            "A green-ish gelatinous...thing. You're not sure what it's made of.",
             1,
             50,
             new Dictionary<StatType, int>
@@ -26,7 +26,7 @@ namespace Enemies
 
         protected override List<EnemyMove> Moves { get; } = new()
         {
-            new EnemyMove("Ooze", 100, 70, 1, 3),
+            new EnemyMove("Ooze", 100, 65, 1, 3),
         };
     }
 }

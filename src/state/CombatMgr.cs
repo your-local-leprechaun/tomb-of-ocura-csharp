@@ -29,6 +29,11 @@ class CombatManager : IState
             // Add to Return Message
             ReturnMessage.Add(result.Message);
 
+            if (result.EarlyReturn == true)
+            {
+                return new Return(string.Join("\n", ReturnMessage));
+            }
+
             CullEnemies();
 
             // Check if only player is left (win condition)

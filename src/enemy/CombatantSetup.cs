@@ -46,9 +46,13 @@ namespace Combatants
 
         public int Damage(int damage)
         {
-            // At some point add in the ability to have armor that helps deal less damage.
-            CurrHealth -= damage;
-            return damage;
+            int dealtDamage = damage - Equipment.TotalReduction();
+            if (dealtDamage < 0)
+            {
+                dealtDamage = 0;
+            }
+            CurrHealth -= dealtDamage;
+            return dealtDamage;
         }
 
         public void Heal(int healAmmount)

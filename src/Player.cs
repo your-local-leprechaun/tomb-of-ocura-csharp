@@ -1,4 +1,3 @@
-
 using Stats;
 using Returns;
 using Combatants;
@@ -40,7 +39,8 @@ public class Player : CombatantBase, ICombatant
         new Dictionary<EquipType, IEquipment>
         {
             // Debug gear for testing combat without walking to the item each run.
-            { EquipType.Melee, new MeleeBase("Debug Sword", "A sword for debuggers", 99, 3, 5) { IsEquipped = true } },
+            // { EquipType.Melee, new MeleeBase("Debug Sword", "A sword for debuggers", 99, 3, 5) { IsEquipped = true } },
+            // { EquipType.Chest, new ArmorBase("Debug Chest", "A chestplate for debugging", EquipType.Chest, 10) { IsEquipped = true } }
         }
     )
     { }
@@ -96,6 +96,17 @@ public class Player : CombatantBase, ICombatant
         {
             Hold();
             return new Return($"Player preps for their next attack.");
+        }
+        else if (command.Verb == "check")
+        {
+            IEnemy? enemy = combatants.FirstOrDefault(c => c.Name.ToLower() == command.Noun) as IEnemy ?? null;
+
+            if (enemy is null)
+            {
+                throw new CommandException("--Unknown Target--");
+            }
+
+            return new Return(enemy.Status(), earlyReturn: true);
         }
 
         throw new CommandException("--Unknown Command--");

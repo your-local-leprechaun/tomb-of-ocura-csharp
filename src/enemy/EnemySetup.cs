@@ -9,6 +9,7 @@ namespace Enemies
     {
         string Description { get; }
         int Level { get; }
+        string Status();
     }
 
     /// <summary>
@@ -27,7 +28,7 @@ namespace Enemies
 
         // How often the enemy chooses to hold instead of attacking, relative to
         // the combined weight of its Moves. Not offered while already holding.
-        protected virtual int HoldWeight => 200;
+        protected virtual int HoldWeight => 15;
 
         public EnemyBase(
             string name,
@@ -45,7 +46,7 @@ namespace Enemies
 
         public string Status()
         {
-            return $"{Name}\n{Level}\n{CurrHealth}/{MaxHealth}\n{Description}";
+            return $"{Name}\nLvl {Level} {GetType().Name}\nHealth: {CurrHealth}/{MaxHealth}\n{Description}";
         }
 
         protected bool TryHit(int hitChance)
@@ -69,8 +70,11 @@ namespace Enemies
 
             int damage = CalcDamage(move.MinDamage, move.MaxDamage);
             int dealtDamage = Player.Get.Damage(damage);
-
-            return new Return($"{Name} hits Player with {move.Name} for {dealtDamage}!\nPlayer HP ({Player.Get.CurrHealth}/{Player.Get.MaxHealth})");
+            if (dealtDamage != 0)
+            {
+                return new Return($"{Name} hits Player with {move.Name} for {dealtDamage}!\nPlayer HP ({Player.Get.CurrHealth}/{Player.Get.MaxHealth})");
+            }
+            return new Return($"{Name} hits Player with {move.Name}, but deals no damage!");
         }
 
         protected Return PerformHold()

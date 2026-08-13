@@ -41,4 +41,17 @@ public class EquipmentManager
     {
         return EquippedItems[slot];
     }
+
+    public int TotalReduction()
+    {
+        int total = 0;
+        foreach (var item in EquippedItems.Values)
+        {
+            if (item is IArmor armor)
+            {
+                total += armor.Reduction;
+            }
+        }
+        return total;
+    }
 }

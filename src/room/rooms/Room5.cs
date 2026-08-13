@@ -1,6 +1,6 @@
 using Commands;
 using Enemies;
-using Items;
+using Items.Equipment;
 using Returns;
 
 namespace Rooms
@@ -14,9 +14,11 @@ namespace Rooms
         {
             // Add OG Choices
             RegisterHandler(new Command("move", "south"), MoveSouth);
+            RegisterHandler(new Command("grab", "breastplate"), GrabBreastplate);
+            RegisterHandler(new Command("grab", "breastplate", "broken"), GrabBreastplate);
 
             // Add OG Items
-            // AddItem(new BasicKey());
+            AddItem(new BrokenBreastplate());
 
             // Add Enemies
             AddEnemy(new Slime("Slimey"));
@@ -26,6 +28,18 @@ namespace Rooms
         private Return MoveSouth()
         {
             return new Return("You walk down the long hallway.", Hallway1.Get);
+        }
+
+        private Return GrabBreastplate()
+        {
+            CollectItem<BrokenBreastplate>();
+
+            UpdateDescription("A room that was once an armory, there are pieces of armor on many manaquins, with a few other pieces laying about, none of which would fit you. To the south is the hallway. To the east is a room.");
+
+            UnregisterHandler(new Command("grab", "breastplate"));
+            UnregisterHandler(new Command("grab", "breastplate", "broken"));
+
+            return new Return("You pick up the broken breastplate.");
         }
     }
 }

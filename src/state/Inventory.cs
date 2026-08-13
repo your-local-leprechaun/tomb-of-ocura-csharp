@@ -124,7 +124,7 @@ public class Inventory : Singleton<Inventory>, IState
 
         foreach (IItem item in _storage)
         {
-            itemList += $"\n  {item.ItemName}" + (item is IEquipment equip && equip.IsEquipped ? " *" : "");
+            itemList += $"\n  {item.ItemName}" + (item is IEquipment equip && equip.IsEquipped ? "*" : "");
         }
 
         return new Return(itemList);
