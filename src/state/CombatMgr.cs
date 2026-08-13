@@ -1,5 +1,7 @@
 using Combatants;
 using Commands;
+using Enemies;
+using Items;
 using Parser;
 using Returns;
 using State;
@@ -34,7 +36,7 @@ class CombatManager : IState
                 return new Return(string.Join("\n", ReturnMessage));
             }
 
-            CullEnemies();
+            ReturnMessage.AddRange(CullEnemies());
 
             // Check if only player is left (win condition)
             if (_combatants.Count == 1)
@@ -138,16 +140,35 @@ class CombatManager : IState
     }
 
     /// <summary>
-    /// Remove all enemies with health below or equal to 0
+    /// Remove all enemies with health below or equal to 0, rolling their drops
+    /// into the player's inventory first. Returns messages announcing any drops.
     /// </summary>
-    private void CullEnemies()
+    private List<string> CullEnemies()
     {
+        List<string> messages = new();
         ICombatant current = _combatants[_initiative];
+
+        var dead = _combatants.Where(c => c.CurrHealth <= 0 && c is not Player);
+        foreach (ICombatant enemy in dead)
+        {
+            if (enemy is not IEnemy dyingEnemy)
+            {
+                continue;
+            }
+
+            foreach (IItem item in dyingEnemy.RollDrops())
+            {
+                Inventory.Get.AddItem(item);
+                messages.Add($"{enemy.Name} dropped {item.ItemName}!");
+            }
+        }
 
         _combatants.RemoveAll(enemy => enemy.CurrHealth <= 0 && enemy is not Player);
 
         // Removing dead combatants can shift everyone's index, so re-find whoever's
         // turn it currently is instead of trusting the old _initiative value.
         _initiative = Math.Max(0, _combatants.IndexOf(current));
+
+        return messages;
     }
 }

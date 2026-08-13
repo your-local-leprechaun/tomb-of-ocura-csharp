@@ -1,4 +1,3 @@
-
 namespace Items.Equipment
 {
     public class RustySword : MeleeBase

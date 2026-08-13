@@ -41,7 +41,7 @@ namespace Frontend
         }
 
         // Use 12 for game
-        private void PrintOut(string message, int sleep = 0)
+        private void PrintOut(string message, int sleep = 12)
         {
             foreach (char c in message)
             {
