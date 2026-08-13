@@ -19,7 +19,7 @@ namespace Rooms
         private Return MoveNorth()
         {
             // Move to Room 6
-            return new Return("You walk to the northern room.");
+            return new Return("You walk to the northern room.", Room6.Get);
         }
         private Return MoveSouth()
         {

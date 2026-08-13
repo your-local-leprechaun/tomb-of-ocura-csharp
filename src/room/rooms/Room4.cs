@@ -21,7 +21,7 @@ namespace Rooms
         // Choice Methods
         private Return MoveNorth()
         {
-            return new Return("Move to the north");
+            return new Return("Move to the north", Room3.Get);
         }
         private Return OpenChest()
         {

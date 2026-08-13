@@ -14,6 +14,7 @@ namespace Rooms
         {
             // Add OG Choices
             RegisterHandler(new Command("move", "south"), MoveSouth);
+            RegisterHandler(new Command("move", "east"), MoveEast);
             RegisterHandler(new Command("grab", "breastplate"), GrabBreastplate);
             RegisterHandler(new Command("grab", "breastplate", "broken"), GrabBreastplate);
 
@@ -28,6 +29,11 @@ namespace Rooms
         private Return MoveSouth()
         {
             return new Return("You walk down the long hallway.", Hallway1.Get);
+        }
+
+        private Return MoveEast()
+        {
+            return new Return("You enter into the room to your east.", Room6.Get);
         }
 
         private Return GrabBreastplate()

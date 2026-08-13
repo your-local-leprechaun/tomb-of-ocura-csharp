@@ -30,8 +30,8 @@ namespace Rooms
         {
             { "symbol", "a symbol drawn in blood" },
             { "candles", "unlit candles" },
-            { "eastExit", "a hallway" },
-            { "northExit", "a room" }
+            { "eastExit", "a room" },
+            { "northExit", "a hallways" }
         };
 
         private void SetFragment(string key, string value)
