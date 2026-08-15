@@ -159,7 +159,7 @@ namespace Rooms
             if (!NeedsRespawn)
             {
                 RoomRegistry.Register(this);
-                NeedsRespawn = false;
+                NeedsRespawn = true;
             }
         }
 

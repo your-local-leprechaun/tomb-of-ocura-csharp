@@ -62,6 +62,8 @@ namespace Parser
             { "hold", (TokenType.VERB, "hold") },
             { "cast", (TokenType.VERB, "cast") },
             { "magic", (TokenType.VERB, "cast") },
+            { "leave", (TokenType.VERB, "leave") },
+            { "use", (TokenType.VERB, "use") },
 
             // Fillers
             { "the", (TokenType.FILLER, "the") },

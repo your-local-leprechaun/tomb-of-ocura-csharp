@@ -12,6 +12,8 @@ public class Inventory : Singleton<Inventory>, IState
     private Inventory()
     {
         AddItem(new PoisonMist());
+        AddItem(new Trash());
+        AddItem(new Trash());
     }
 
     public static Inventory Get => Instance;
@@ -125,9 +127,19 @@ public class Inventory : Singleton<Inventory>, IState
     {
         string itemList = "Inventory";
 
-        foreach (IItem item in _storage)
+        foreach (var group in _storage.GroupBy(i => i.ItemName))
         {
-            itemList += $"\n  {item.ItemName}" + (item is IEquipment equip && equip.IsEquipped ? "*" : "");
+            if (group.First() is IEquipment || group.Count() == 1)
+            {
+                foreach (IItem item in group)
+                {
+                    itemList += $"\n  {item.ItemName}" + (item is IEquipment equip && equip.IsEquipped ? "*" : "");
+                }
+            }
+            else
+            {
+                itemList += $"\n  {group.Key} x{group.Count()}";
+            }
         }
 
         return new Return(itemList);

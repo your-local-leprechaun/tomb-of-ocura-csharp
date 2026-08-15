@@ -8,6 +8,13 @@ public class StatusManager
 
     public void Apply(IStatus status)
     {
+        IStatus? existing = Statuses.FirstOrDefault(s => s.GetType() == status.GetType());
+        if (existing != null)
+        {
+            existing.ExtendTime(status.Time);
+            return;
+        }
+
         Statuses.Add(status);
     }
 

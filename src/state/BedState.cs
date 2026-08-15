@@ -2,6 +2,7 @@
 using Commands;
 using Parser;
 using Returns;
+using Rooms;
 using State;
 
 public class BedState : IState
@@ -21,7 +22,8 @@ public class BedState : IState
         Player.Get.CurrHealth = Player.Get.MaxHealth;
 
         // Reset all rooms!
+        RoomRegistry.RespawnTouched();
 
-        return new Return("As you lay down, your health is fully restored!");
+        return new Return("As you lay down, your health is fully restored and the tomb comes back to life with monsters...");
     }
 }

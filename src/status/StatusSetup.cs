@@ -14,6 +14,7 @@ namespace Status
         /// </summary>
         /// <param name="target">Who is being inflicted with the status?</param>
         Return Inflict(ICombatant target);
+        void ExtendTime(int amount);
     }
 
     public class StatusBase : IStatus
@@ -24,6 +25,11 @@ namespace Status
         public virtual Return Inflict(ICombatant target)
         {
             return new Return("Status inflicted!");
+        }
+
+        public void ExtendTime(int amount)
+        {
+            Time += amount;
         }
 
         public StatusBase(int time, string name)

@@ -20,9 +20,15 @@ namespace Rooms
             AddItem(new BrokenBreastplate());
 
             // Add Enemies
-            AddEnemy(new Skeleton("Skele"));
-            AddEnemy(new Skeleton("Ashey"));
-            AddEnemy(new SkeletonCommander("White Bone"));
+            Respawn();
+        }
+
+        public override void Respawn()
+        {
+            AddEnemy(() => new Skeleton("Skele"));
+            AddEnemy(() => new Skeleton("Ashey"));
+            AddEnemy(() => new SkeletonCommander("White Bone"));
+            base.Respawn();
         }
 
         // Custom Choice Methods
