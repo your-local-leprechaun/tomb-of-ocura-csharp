@@ -1,6 +1,7 @@
 using Basic;
 using Commands;
 using Items;
+using Items.Consumables;
 using Items.Equipment;
 using Parser;
 using Returns;
@@ -11,7 +12,7 @@ public class Inventory : Singleton<Inventory>, IState
     // Singleton Stuff
     private Inventory()
     {
-        AddItem(new PoisonMist());
+        AddItem(new HealthPotion());
     }
 
     public static Inventory Get => Instance;
@@ -23,7 +24,7 @@ public class Inventory : Singleton<Inventory>, IState
         {
             return new Return("Closing inventory...", previous: true);
         }
-        else if (command.Verb == "show" && command.Noun == "inventory")
+        else if (command == new Command("show", "inventory") || command == new Command("show", "items"))
         {
             return ListItems();
         }
@@ -38,6 +39,10 @@ public class Inventory : Singleton<Inventory>, IState
         else if (command.Verb == "unequip")
         {
             return UnequipItem(command);
+        }
+        else if (command.Verb == "use")
+        {
+            return UseConsumable(command);
         }
         throw new CommandException("--Unknown Command--");
     }
@@ -92,7 +97,7 @@ public class Inventory : Singleton<Inventory>, IState
 
         IItem? item = _storage.FirstOrDefault(i =>
             string.Equals(i.ItemName, searchName, StringComparison.OrdinalIgnoreCase));
-        
+
         if (item is null)
         {
             return new Return($"-No {searchName} in your inventory-");
@@ -116,6 +121,24 @@ public class Inventory : Singleton<Inventory>, IState
         return new Return($"Unequipped {item.ItemName}");
     }
 
+    private Return UseConsumable(Command command)
+    {
+        // first, check if command.noun is really a consumable item
+        // Find Item
+        string searchName = command.Adjective is null ? command.Noun :
+        $"{command.Adjective} {command.Noun}";
+
+        IConsumable? item = _storage.FirstOrDefault(i =>
+            string.Equals(i.ItemName, searchName, StringComparison.OrdinalIgnoreCase)) as IConsumable ?? null;
+
+        if (item is null)
+        {
+            throw new CommandException("No consumable found!");
+        }
+
+        return item.Consume();
+    }
+
     public Return Activate()
     {
         return ListItems();
@@ -125,9 +148,16 @@ public class Inventory : Singleton<Inventory>, IState
     {
         string itemList = "Inventory";
 
-        foreach (IItem item in _storage)
+        if (_storage.Count != 0)
         {
-            itemList += $"\n  {item.ItemName}" + (item is IEquipment equip && equip.IsEquipped ? "*" : "");
+            foreach (IItem item in _storage)
+            {
+                itemList += $"\n  {item.ItemName}" + (item is IEquipment equip && equip.IsEquipped ? "*" : "");
+            }
+        }
+        else
+        {
+            itemList+= "\n--No Items--";
         }
 
         return new Return(itemList);
@@ -153,5 +183,10 @@ public class Inventory : Singleton<Inventory>, IState
         {
             _storage.Remove(item);
         }
+    }
+
+    public void RemoveItem(IItem item)
+    {
+        _storage.Remove(item);
     }
 }

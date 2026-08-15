@@ -23,7 +23,7 @@ namespace Items
 
         public virtual string GetInfo()
         {
-            return $"{ItemName}\n{Description}";
+            return $"{ItemName}\nType: {Type}\n{Description}";
         }
 
         public ItemBase(string itemName, string description, ItemType type)
