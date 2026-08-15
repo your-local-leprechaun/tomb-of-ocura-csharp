@@ -8,7 +8,7 @@ namespace Main
     public class Game
     {
         // IState _activeState = new MainMenu();
-        IState _activeState = Rooms.Room2.Get;
+        IState _activeState = Rooms.Room5.Get;
         IState? _previousState = null;
         Parser.Parser parser = new Parser.Parser();
         Frontend.Display Display = new Frontend.Display();

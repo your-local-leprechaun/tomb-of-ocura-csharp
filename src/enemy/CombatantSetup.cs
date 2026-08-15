@@ -15,9 +15,10 @@ namespace Combatants
         StatManager Stats { get; }
         EquipmentManager Equipment { get; }
 
-        //StatusManager in the future
+        StatusManager Conditions { get; }
 
         int Damage(int damage);
+        void DirectDamage(int damage);
         void Heal(int damage);
 
         Return TakeAction(List<ICombatant> combatants);
@@ -33,6 +34,7 @@ namespace Combatants
             Experience = experience;
             Stats = new StatManager(initialStats);
             Equipment = new EquipmentManager(initialEquipment);
+            Conditions = new StatusManager();
         }
 
         public string Name { get; set; }
@@ -43,6 +45,7 @@ namespace Combatants
 
         public StatManager Stats { get; }
         public EquipmentManager Equipment { get; }
+        public StatusManager Conditions { get; }
 
         public int Damage(int damage)
         {
@@ -53,6 +56,11 @@ namespace Combatants
             }
             CurrHealth -= dealtDamage;
             return dealtDamage;
+        }
+
+        public void DirectDamage(int damage)
+        {
+            CurrHealth -= damage;
         }
 
         public void Heal(int healAmmount)

@@ -66,6 +66,17 @@ class CombatManager : IState
                 result = enemy.TakeAction(_combatants);
                 ReturnMessage.Add(result.Message);
 
+                ReturnMessage.AddRange(CullEnemies());
+
+                // Check if only player is left (win condition) - an enemy may have
+                // died from a status effect (e.g. poison) ticking on its own turn.
+                if (_combatants.Count == 1)
+                {
+                    _roomEnemies.Clear();
+                    ReturnMessage.Add("Player Wins!");
+                    return new Return(string.Join("\n", ReturnMessage), previous: true);
+                }
+
                 NextTurn();
             }
 

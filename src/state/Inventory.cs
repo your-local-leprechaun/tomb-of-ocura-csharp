@@ -9,7 +9,10 @@ using State;
 public class Inventory : Singleton<Inventory>, IState
 {
     // Singleton Stuff
-    private Inventory() { }
+    private Inventory()
+    {
+        AddItem(new PoisonMist());
+    }
 
     public static Inventory Get => Instance;
 

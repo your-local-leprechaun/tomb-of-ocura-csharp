@@ -1,4 +1,5 @@
 using Combatants;
+using Items;
 using Items.Equipment;
 using Stats;
 

@@ -10,7 +10,7 @@ namespace Items.Equipment
         Gloves,
         Legs,
         Melee,
-        Magic,
+        Spell,
         Ring
     }
     public interface IEquipment : IItem

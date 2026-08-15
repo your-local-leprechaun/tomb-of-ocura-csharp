@@ -39,7 +39,8 @@ public class Player : CombatantBase, ICombatant
         new Dictionary<EquipType, IEquipment>
         {
             // Debug gear for testing combat without walking to the item each run.
-            { EquipType.Melee, new MeleeBase("Debug Sword", "A sword for debuggers", 99, 4, 6) { IsEquipped = true } },
+            // { EquipType.Melee, new MeleeBase("Debug Sword", "A sword for debuggers", 99, 4, 6) { IsEquipped = true } },
+            { EquipType.Spell, new PoisonMist() }
             // { EquipType.Chest, new ArmorBase("Debug Chest", "A chestplate for debugging", EquipType.Chest, 10) { IsEquipped = true } }
         }
     )
@@ -107,6 +108,28 @@ public class Player : CombatantBase, ICombatant
             }
 
             return new Return(enemy.Status(), earlyReturn: true);
+        }
+        else if (command.Verb == "cast")
+        {
+            IEnemy? enemy = combatants.FirstOrDefault(c => c.Name.ToLower() == command.Noun) as IEnemy ?? null;
+
+            if (enemy is null)
+            {
+                throw new CommandException("--Unknown Target--");
+            }
+
+            // Grab our current spell
+            ISpell? spell = Equipment.EquippedSlot(EquipType.Spell) as ISpell ?? null;
+
+            if (spell is null)
+            {
+                throw new CommandException("--No Spell Equipped--");
+            }
+
+            // Put spell on enemy now
+            enemy.Conditions.Apply(spell.Status);
+
+            return new Return($"{enemy.Name} has been {spell.Status.Name}!");
         }
 
         throw new CommandException("--Unknown Command--");

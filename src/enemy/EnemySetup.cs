@@ -1,3 +1,4 @@
+using System.Runtime;
 using Combatants;
 using Commands;
 using Items;
@@ -7,7 +8,7 @@ using Stats;
 
 namespace Enemies
 {
-    public interface IEnemy
+    public interface IEnemy : ICombatant
     {
         string Description { get; }
         int Level { get; }
@@ -27,7 +28,7 @@ namespace Enemies
     /// </summary>
     public record ItemDrop(Func<IItem> Factory, int Chance);
 
-    public class EnemyBase : CombatantBase, IEnemy
+    public class EnemyBase : CombatantBase, IEnemy, ICombatant
     {
         public string Description { get; init; }
         public int Level { get; init; } = 1;
@@ -201,7 +202,27 @@ namespace Enemies
 
         public override Return TakeAction(List<ICombatant> combatants)
         {
-            return ChooseAndAct(combatants);
+            List<string> ReturnMessage = [];
+
+            // If statuses are around, Inflict all!
+            Return response = Conditions.Aflict(this);
+            if (response.Message != "")
+            {
+                ReturnMessage.Add(response.Message);
+            }
+            
+            // If enemy is dead, return
+            if (CurrHealth <= 0)
+            {
+                ReturnMessage.Add($"{Name} died! {Experience}xp gained!");
+                Player.Get.PlayerExperience += Experience;
+                return new Return(string.Join("\n", ReturnMessage));    
+            }
+
+            // Take turn if not dead!
+            ReturnMessage.Add(ChooseAndAct(combatants).Message);
+
+            return new Return(string.Join("\n", ReturnMessage));
         }
     }
 }
