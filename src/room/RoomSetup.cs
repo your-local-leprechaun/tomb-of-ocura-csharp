@@ -7,6 +7,8 @@ using State;
 using System.Text;
 using Enemies;
 using Combatants;
+using System.DirectoryServices;
+using System.Net;
 
 namespace Rooms
 {
@@ -15,6 +17,8 @@ namespace Rooms
         string Description { get; }
         List<string> Choices { get; }
         List<IItem> Items { get; }
+        bool NeedsRespawn { get; }
+        void Respawn();
     }
 
     public class RoomBase<T> : Singleton<T>, IState, IRoom
@@ -69,6 +73,14 @@ namespace Rooms
         public List<string> Choices { get; private set; } = [];
         public List<IItem> Items { get; private set; } = [];
         public List<ICombatant> Enemies { get; private set; } = [];
+
+        public bool NeedsRespawn { get; private set; } = false;
+
+        public virtual void Respawn()
+        {
+            // Respawn enemies here!
+            return;
+        }
 
         protected void RegisterHandler(Command command, Func<Return> handler, bool showChoice = true, string? displayText = null)
         {
@@ -141,9 +153,14 @@ namespace Rooms
             RemoveItem(item);
         }
 
-        protected void AddEnemy(ICombatant enemy)
+        protected void AddEnemy(Func<ICombatant> factory)
         {
-            Enemies.Add(enemy);
+            Enemies.Add(factory());
+            if (!NeedsRespawn)
+            {
+                RoomRegistry.Register(this);
+                NeedsRespawn = false;
+            }
         }
 
         private Return RoomVitals()
@@ -204,6 +221,22 @@ namespace Rooms
             vitals.AppendLine("  (none)");
 
             return new Return(vitals.ToString());
+        }
+    }
+
+    public class RoomRegistry
+    {
+        private static readonly List<IRoom> _rooms = [];
+        public static void Register(IRoom room) => _rooms.Add(room);
+
+        public static void RespawnTouched()
+        {
+            List<IRoom> touched = _rooms.Where(r => r.NeedsRespawn).ToList();
+
+            foreach (IRoom room in touched)
+            {
+                room.Respawn();
+            }
         }
     }
 }

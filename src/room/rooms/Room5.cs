@@ -21,8 +21,8 @@ namespace Rooms
             // Add OG Items
             AddItem(new BrokenBreastplate());
 
-            // Add Enemies
-            AddEnemy(new Slime("Slimey"));
+            // Add Enemies in Respawn function
+            Respawn();
         }
 
         // Custom Choice Methods
@@ -46,6 +46,11 @@ namespace Rooms
             UnregisterHandler(new Command("grab", "breastplate", "broken"));
 
             return new Return("You pick up the broken breastplate.");
+        }
+
+        public override void Respawn()
+        {
+            AddEnemy(() => new Slime("Slimey"));
         }
     }
 }
