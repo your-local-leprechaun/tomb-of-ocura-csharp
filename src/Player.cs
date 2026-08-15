@@ -50,6 +50,7 @@ public class Player : CombatantBase, ICombatant
     {
         List<string> ReturnString = [];
         ReturnString.Add($"{Name} (Player)");
+        ReturnString.Add($"{CurrHealth}/{MaxHealth}");
         ReturnString.Add($"XP: {PlayerExperience}");
         ReturnString.Add(Stats.Status());
         ReturnString.Add(Equipment.Status());

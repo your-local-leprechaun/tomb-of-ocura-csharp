@@ -12,6 +12,13 @@ namespace Commands
             Verb = verb;
             Adjective = adjective;
             Noun = noun;
+
+            // Add all to dictionary
+            if (adjective is not null)
+            {
+                Parser.Parser.RegisterAdjective(adjective);
+            }
+            Parser.Parser.RegisterNoun(noun);
         }
     }
 }

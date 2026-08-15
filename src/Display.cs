@@ -2,48 +2,8 @@ using System.Collections.Concurrent;
 
 namespace Frontend
 {
-    /// <summary>
-    /// Class that handles all front facing UI. Displays what we tell it plus what
-    /// ever we decide in the future.
-    ///
-    /// The window runs on its own dedicated UI thread (WinForms owns that thread via
-    /// Application.Run and its message loop). The game thread keeps calling
-    /// Render/Input synchronously exactly like it did against the console - Render
-    /// marshals text onto the UI thread, and Input blocks the game thread until the
-    /// UI thread hands it a submitted line.
-    /// </summary>
     public class Display
     {
-        private readonly BlockingCollection<string> _inputQueue = new(boundedCapacity: 1);
-        private readonly ManualResetEventSlim _windowReady = new();
-        private GameWindow? _window;
-
-        public Display()
-        {
-            Thread uiThread = new(StartUi)
-            {
-                IsBackground = true
-            };
-            uiThread.SetApartmentState(ApartmentState.STA);
-            uiThread.Start();
-
-            // Don't let the game thread touch _window before the UI thread has
-            // actually created it.
-            _windowReady.Wait();
-        }
-
-        private void StartUi()
-        {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-
-            _window = new GameWindow(_inputQueue);
-            _windowReady.Set();
-
-            // Blocks this thread forever, pumping window messages, until the
-            // window closes.
-            Application.Run(_window);
-        }
 
         /// <summary>
         /// Renders information to the screen, mainly just a message atm, but
@@ -57,7 +17,9 @@ namespace Frontend
 
         public string Input()
         {
-            return _inputQueue.Take();
+            Console.Write("> ");
+            string input = Console.ReadLine() ?? "";
+            return input;
         }
 
         public void Exit()

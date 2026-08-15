@@ -19,7 +19,7 @@ namespace Combatants
 
         int Damage(int damage);
         void DirectDamage(int damage);
-        void Heal(int damage);
+        int Heal(int damage);
 
         Return TakeAction(List<ICombatant> combatants);
     }
@@ -63,9 +63,18 @@ namespace Combatants
             CurrHealth -= damage;
         }
 
-        public void Heal(int healAmmount)
+        public int Heal(int healAmmount)
         {
-            CurrHealth += healAmmount;
+            if (CurrHealth + healAmmount <= MaxHealth)
+            {
+                CurrHealth += healAmmount;
+                return healAmmount;
+            }
+            else
+            {
+                int trueHeal = MaxHealth - CurrHealth;
+                return trueHeal;
+            }
         }
 
         protected void Hold()
