@@ -94,7 +94,7 @@ public class Player : CombatantBase, ICombatant
 
             return new Return($"Player hits {enemy.Name} for {dealtDamage}\n{enemy.Name} HP({enemy.CurrHealth}/{enemy.MaxHealth})");
         }
-        else if (command.Verb == "hold")
+        else if (command == new Command("hold", "action"))
         {
             Hold();
             return new Return($"Player preps for their next attack.");

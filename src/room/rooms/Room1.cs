@@ -14,8 +14,7 @@ namespace Rooms
         {
             RegisterHandler(new Command("grab", "key"), GrabKey);
             RegisterHandler(new Command("open", "door"), OpenDoor);
-            
-            // AddChoice("use bed");
+            RegisterHandler(new Command("use", "bed"), UseBed);
 
             AddItem(new BasicKey());
             AddItem(new Note12());
@@ -60,6 +59,11 @@ namespace Rooms
             UnregisterHandler(new Command("check", "hay"));
             CollectItem<Note12>();
             return new Return("Looking through the pile of hay, you find a small note.");
+        }
+
+        private Return UseBed()
+        {
+            return new Return("You lay down in bed.", new BedState());
         }
     }
 }
