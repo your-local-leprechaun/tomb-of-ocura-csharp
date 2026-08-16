@@ -26,15 +26,17 @@ class CombatManager : IState
     {
         List<string> ReturnMessage = [];
 
-        // Take in Player Action
-        Return result = Player.Get.PlayerAction(command, _combatants);
+        // Take in Player Action (a combat command, or an inventory action taken as the turn)
+        Return result = HandlePlayerCommand(command);
 
         // Add to Return Message
         ReturnMessage.Add(result.Message);
 
         if (result.EarlyReturn == true)
         {
-            return new Return(string.Join("\n", ReturnMessage), combatants: _combatants);
+            return result.Equipment == true
+                ? new Return(string.Join("\n", ReturnMessage), equipment: true)
+                : new Return(string.Join("\n", ReturnMessage), combatants: _combatants);
         }
 
         ReturnMessage.AddRange(CullEnemies());
@@ -95,6 +97,72 @@ class CombatManager : IState
     }
 
     /// <summary>
+    /// Routes a command to either combat (attack/hold/check enemy/cast) or the inventory
+    /// (equip/unequip/use). Opening the inventory to look around and checking an item are
+    /// free (EarlyReturn); equipping, unequipping, and using a consumable cost the player's turn,
+    /// same as an attack would.
+    ///
+    /// While "browsing" (after "open inventory", before "close inventory") combat commands
+    /// are blocked entirely - same as the standalone Inventory state, you have to close it
+    /// before you can act again.
+    /// </summary>
+    private Return HandlePlayerCommand(Command command)
+    {
+        if (command == new Command("open", "inventory") ||
+            command == new Command("show", "inventory") ||
+            command == new Command("show", "items"))
+        {
+            _browsingInventory = true;
+            return new Return(Inventory.Get.List().Message, earlyReturn: true, equipment: true);
+        }
+
+        if (command == new Command("close", "inventory"))
+        {
+            _browsingInventory = false;
+            return new Return("You tuck your things away and refocus on the fight.", earlyReturn: true, combatants: _combatants);
+        }
+
+        // "check" is ambiguous between an enemy and an inventory item - if the name
+        // doesn't match a combatant, fall back to examining an item instead.
+        if (command.Verb == "check" && !_combatants.Any(c => c.Name.ToLower() == command.Noun))
+        {
+            return new Return(
+                Inventory.Get.Examine(command).Message,
+                earlyReturn: true,
+                combatants: _browsingInventory ? null : _combatants,
+                equipment: _browsingInventory ? true : null);
+        }
+
+        // Equipping/unequipping/using a consumable is always allowed as the player's action -
+        // whether or not you bothered to "open inventory" first - and it ends any browsing,
+        // since the turn is about to resolve and combat resumes.
+        if (command.Verb == "equip")
+        {
+            _browsingInventory = false;
+            return new Return(Inventory.Get.Equip(command).Message, combatants: _combatants);
+        }
+
+        if (command.Verb == "unequip")
+        {
+            _browsingInventory = false;
+            return new Return(Inventory.Get.Unequip(command).Message, combatants: _combatants);
+        }
+
+        if (command.Verb == "use")
+        {
+            _browsingInventory = false;
+            return new Return(Inventory.Get.Use(command).Message, combatants: _combatants);
+        }
+
+        if (_browsingInventory)
+        {
+            throw new InvalidActionException("Close your inventory before doing that.");
+        }
+
+        return Player.Get.PlayerAction(command, _combatants);
+    }
+
+    /// <summary>
     /// This one needs to loop through them in case the order is without the player first
     /// </summary>
     /// <returns></returns>
@@ -122,6 +190,7 @@ class CombatManager : IState
     private List<ICombatant> _combatants = new();
     private readonly List<ICombatant> _roomEnemies;
     private int _initiative = 0;
+    private bool _browsingInventory = false;
 
     public CombatManager(List<ICombatant> enemies)
     {

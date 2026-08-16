@@ -18,6 +18,6 @@ public class MainMenu : IState
 
     public Return Activate()
     {
-        return new Return("The Tomb of Ocura\n\nStart Game\nQuit");
+        return new Return("\nStart Game\nQuit");
     }
 }

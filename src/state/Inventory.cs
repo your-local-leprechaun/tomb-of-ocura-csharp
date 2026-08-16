@@ -15,6 +15,7 @@ public class Inventory : Singleton<Inventory>, IState
         AddItem(new PoisonMist());
         AddItem(new Trash());
         AddItem(new Trash());
+        AddItem(new HealthPotion());
     }
 
     public static Inventory Get => Instance;
@@ -32,23 +33,23 @@ public class Inventory : Singleton<Inventory>, IState
         }
         else if (command == new Command("show", "inventory") || command == new Command("show", "items"))
         {
-            message = ListItems().Message;
+            message = List().Message;
         }
         else if (command.Verb == "check")
         {
-            message = ExamineItem(command).Message;
+            message = Examine(command).Message;
         }
         else if (command.Verb == "equip")
         {
-            message = EquipItem(command).Message;
+            message = Equip(command).Message;
         }
         else if (command.Verb == "unequip")
         {
-            message = UnequipItem(command).Message;
+            message = Unequip(command).Message;
         }
         else if (command.Verb == "use")
         {
-            message = UseConsumable(command).Message;
+            message = Use(command).Message;
         }
         else
         {
@@ -59,7 +60,7 @@ public class Inventory : Singleton<Inventory>, IState
         return new Return(message, equipment: true);
     }
 
-    private Return ExamineItem(Command command)
+    public Return Examine(Command command)
     {
         // Build the item name
         string searchName = command.Adjective is null ? command.Noun :
@@ -76,7 +77,7 @@ public class Inventory : Singleton<Inventory>, IState
         return new Return(item.GetInfo());
     }
 
-    private Return EquipItem(Command command)
+    public Return Equip(Command command)
     {
         // Build Item Name
         string searchName = command.Adjective is null ? command.Noun :
@@ -87,21 +88,20 @@ public class Inventory : Singleton<Inventory>, IState
 
         if (item == null)
         {
-            return new Return($"-No {searchName} in your inventory-");
+            throw new InvalidTargetException(searchName);
         }
         if (item is not IEquipment equipment)
         {
-            return new Return($"-{item.ItemName} is not equippable-");
+            throw new InvalidActionException($"{item.ItemName} is not equippable.");
         }
-        IEquipment equip = (IEquipment)item;
 
         // Equip the item here
-        equip.Equip();
+        equipment.Equip();
 
         return new Return($"Equipped {item.ItemName}");
     }
 
-    private Return UnequipItem(Command command)
+    public Return Unequip(Command command)
     {
         // Find Item
         string searchName = command.Adjective is null ? command.Noun :
@@ -112,11 +112,11 @@ public class Inventory : Singleton<Inventory>, IState
 
         if (item is null)
         {
-            return new Return($"-No {searchName} in your inventory-");
+            throw new InvalidTargetException(searchName);
         }
         else if (item is not IEquipment)
         {
-            return new Return($"-{searchName} is not equipable-");
+            throw new InvalidActionException($"{searchName} is not equipable.");
         }
 
         IEquipment equipment = (IEquipment)item;
@@ -124,7 +124,7 @@ public class Inventory : Singleton<Inventory>, IState
         // Check if the slot actually has this item
         if (!Player.Get.Equipment.Equipped(equipment, equipment.EquipSlot))
         {
-            return new Return($"-{searchName} is not equipped-");
+            throw new InvalidActionException($"{searchName} is not equipped.");
         }
 
         // If they do, actually unequip it!
@@ -133,7 +133,7 @@ public class Inventory : Singleton<Inventory>, IState
         return new Return($"Unequipped {item.ItemName}");
     }
 
-    private Return UseConsumable(Command command)
+    public Return Use(Command command)
     {
         // first, check if command.noun is really a consumable item
         // Find Item
@@ -153,10 +153,10 @@ public class Inventory : Singleton<Inventory>, IState
 
     public Return Activate()
     {
-        return new Return(ListItems().Message, equipment: true);
+        return new Return(List().Message, equipment: true);
     }
 
-    private Return ListItems()
+    public Return List()
     {
         string itemList = "Storage:";
 
