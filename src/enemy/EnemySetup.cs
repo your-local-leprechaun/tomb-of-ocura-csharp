@@ -139,7 +139,7 @@ namespace Enemies
             int dealtDamage = Player.Get.Damage(damage);
             if (dealtDamage != 0)
             {
-                return new Return($"{Name} hits Player with {weapon.ItemName} for {dealtDamage}!\nPlayer HP ({Player.Get.CurrHealth}/{Player.Get.MaxHealth})");
+                return new Return($"{Name} hits Player with {weapon.ItemName} for {dealtDamage}!");
             }
             return new Return($"{Name} hits Player with {weapon.ItemName}, but deals no damage!");
         }

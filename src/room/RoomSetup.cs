@@ -5,10 +5,7 @@ using Basic;
 using Parser;
 using State;
 using System.Text;
-using Enemies;
 using Combatants;
-using System.DirectoryServices;
-using System.Net;
 
 namespace Rooms
 {
@@ -19,6 +16,7 @@ namespace Rooms
         List<IItem> Items { get; }
         bool NeedsRespawn { get; }
         void Respawn();
+        void ClearEnemies();
     }
 
     public class RoomBase<T> : Singleton<T>, IState, IRoom
@@ -82,6 +80,11 @@ namespace Rooms
         {
             // Respawn enemies here!
             return;
+        }
+
+        public void ClearEnemies()
+        {
+            Enemies.Clear();
         }
 
         protected void RegisterHandler(Command command, Func<Return> handler, bool showChoice = true, string? displayText = null)
@@ -230,6 +233,7 @@ namespace Rooms
     {
         private static readonly List<IRoom> _rooms = [];
         public static void Register(IRoom room) => _rooms.Add(room);
+        public static IRoom Checkpoint = Room1.Get;
 
         public static void RespawnTouched()
         {
@@ -237,8 +241,18 @@ namespace Rooms
 
             foreach (IRoom room in touched)
             {
+                room.ClearEnemies();
                 room.Respawn();
             }
+        }
+
+        public static void UpdateCheckpoint(IRoom? room)
+        {
+            if (room is null)
+            {
+                return;
+            }
+            Checkpoint = room;
         }
     }
 }

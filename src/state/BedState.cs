@@ -13,7 +13,7 @@ public class BedState : IState
     {
         if (command == new Command("leave", "bed"))
         {
-            return new Return("You get out of bed, ready for the challenge.", previous: true);
+            return new Return("You get out of the bed, ready for the challenge.", previous: true);
         }
         throw new UnknownCommandException(command);
     }
@@ -26,6 +26,8 @@ public class BedState : IState
         // Reset all rooms!
         RoomRegistry.RespawnTouched();
 
-        return new Return("As you lay down, your health is fully restored and the tomb comes back to life with monsters...");
+        // Set Checkpoint to the previous room
+
+        return new Return("As you lay down, your health is fully restored and the tomb comes back to life with monsters...", checkpoint: true);
     }
 }

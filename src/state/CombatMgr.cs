@@ -69,6 +69,13 @@ class CombatManager : IState
 
             ReturnMessage.AddRange(CullEnemies());
 
+            // Check if the player is dead
+            if (Player.Get.CurrHealth <= 0)
+            {
+                ReturnMessage.Add("\n**YOU DIED**\n");
+                return new Return(string.Join("\n", ReturnMessage), new DeathState());
+            }
+
             // Check if only player is left (win condition) - an enemy may have
             // died from a status effect (e.g. poison) ticking on its own turn.
             if (_combatants.Count == 1)

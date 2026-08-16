@@ -1,5 +1,6 @@
 
 using Combatants;
+using Rooms;
 
 namespace Returns
 {
@@ -13,6 +14,7 @@ namespace Returns
         public bool? EarlyReturn { get; init; } = null;
         public List<ICombatant>? Combatants { get; init; } = null;
         public bool? Equipment { get; init; } = null;
+        public bool? Checkpoint { get; init; } = null;
 
         public Return (
             string message,
@@ -20,7 +22,8 @@ namespace Returns
             bool? previous = null,
             bool? earlyReturn = null,
             List<ICombatant>? combatants = null,
-            bool? equipment = null)
+            bool? equipment = null,
+            bool? checkpoint = null)
         {
             Message = message;
             if (state != null)
@@ -42,6 +45,10 @@ namespace Returns
             if (equipment != null)
             {
                 Equipment = equipment;
+            }
+            if (checkpoint != null)
+            {
+                Checkpoint = checkpoint;
             }
         } 
     }

@@ -2,13 +2,14 @@ using Parser;
 using State;
 using Commands;
 using Returns;
+using Rooms;
 
 namespace Main
 {
     public class Game
     {
-        IState _activeState = new MainMenu();
-        // IState _activeState = Rooms.Room2.Get;
+        // IState _activeState = new MainMenu();
+        IState _activeState = Rooms.Room2.Get;
         IState? _previousState = null;
         Parser.Parser parser = new Parser.Parser();
         Frontend.Display Display = new Frontend.Display();
@@ -68,6 +69,12 @@ namespace Main
                         _previousState = temp;
                         response = _activeState.Activate();
                         Display.Render(response, Player.Get, _activeState.Name);
+                    }
+
+                    // Set Checkpoint
+                    if (response.Checkpoint != null)
+                    {
+                        RoomRegistry.UpdateCheckpoint(_activeState as IRoom ?? null);
                     }
                 }
                 catch (ParseException e)

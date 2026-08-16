@@ -366,7 +366,7 @@ namespace Frontend
 
             public void ShowPlayerPanel(Player p)
             {
-                SetPanelText($"{p.Name}\nLevel {p.Level}\nHP: {p.CurrHealth}/{p.MaxHealth}\n\n{p.Stats.Status()}");
+                SetPanelText($"{p.Name}\nLevel {p.Level}\nXP: {p.PlayerExperience}\nHP: {p.CurrHealth}/{p.MaxHealth}\n\n{p.Stats.Status()}");
             }
 
             public void ShowCombatPanel(List<ICombatant> combatants)
@@ -378,7 +378,7 @@ namespace Frontend
 
             public void ShowEquipmentPanel(Player p)
             {
-                SetPanelText($"{p.Name}\nLevel {p.Level}\nHP: {p.CurrHealth}/{p.MaxHealth}\n\n{p.Equipment.Status()}");
+                SetPanelText($"{p.Name}\nLevel {p.Level}\nXP: {p.PlayerExperience}\nHP: {p.CurrHealth}/{p.MaxHealth}\n\n{p.Equipment.Status()}");
             }
 
             // Whenever the panel's content is replaced outright (switching
