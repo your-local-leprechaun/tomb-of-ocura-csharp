@@ -7,6 +7,11 @@ namespace State
     public interface IState
     {
         /// <summary>
+        /// Display name shown in the Display's top state bar (e.g. "Inventory", "Jail Cell").
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
         /// Takes in command and returns dicitonary with information on updates and dispaly
         /// </summary>
         /// <param name="command">Command to make happen</param>

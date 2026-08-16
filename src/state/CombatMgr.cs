@@ -9,6 +9,8 @@ using Stats;
 
 class CombatManager : IState
 {
+    public string Name => "Combat";
+
     /// <summary>
     /// So this one is a bit more complex. We take in a command, attacking (Melee or magic), holding,
     /// and opening inventory to equip and stuff.
@@ -23,72 +25,66 @@ class CombatManager : IState
     public Return Execute(Command command)
     {
         List<string> ReturnMessage = [];
-        try
+
+        // Take in Player Action
+        Return result = Player.Get.PlayerAction(command, _combatants);
+
+        // Add to Return Message
+        ReturnMessage.Add(result.Message);
+
+        if (result.EarlyReturn == true)
         {
-            // Take in Player Action
-            Return result = Player.Get.PlayerAction(command, _combatants);
+            return new Return(string.Join("\n", ReturnMessage), combatants: _combatants);
+        }
 
-            // Add to Return Message
-            ReturnMessage.Add(result.Message);
+        ReturnMessage.AddRange(CullEnemies());
 
-            if (result.EarlyReturn == true)
+        // Check if only player is left (win condition)
+        if (_combatants.Count == 1)
+        {
+            // Defeated enemies are gone for good, so clear them from the room
+            // that spawned this fight or it'll trigger combat again on re-entry.
+            _roomEnemies.Clear();
+            ReturnMessage.Add("Player Wins!");
+            return new Return(string.Join("\n", ReturnMessage), previous: true);
+        }
+
+        NextTurn();
+
+        // Loop through list till Player is active again.
+        while (true)
+        {
+            ICombatant enemy = _combatants[_initiative];
+            // If we've gotten back to Player, break free and return all attacks
+            if(enemy is Player)
             {
-                return new Return(string.Join("\n", ReturnMessage));
+                break;
             }
+
+            // Otherwise, let's continue the loop
+            ReturnMessage.Add($"{enemy.Name}'s turn");
+
+            result = enemy.TakeAction(_combatants);
+            ReturnMessage.Add(result.Message);
 
             ReturnMessage.AddRange(CullEnemies());
 
-            // Check if only player is left (win condition)
+            // Check if only player is left (win condition) - an enemy may have
+            // died from a status effect (e.g. poison) ticking on its own turn.
             if (_combatants.Count == 1)
             {
-                // Defeated enemies are gone for good, so clear them from the room
-                // that spawned this fight or it'll trigger combat again on re-entry.
                 _roomEnemies.Clear();
                 ReturnMessage.Add("Player Wins!");
                 return new Return(string.Join("\n", ReturnMessage), previous: true);
             }
-            
+
             NextTurn();
-
-            // Loop through list till Player is active again.
-            while (true)
-            {
-                ICombatant enemy = _combatants[_initiative];
-                // If we've gotten back to Player, break free and return all attacks
-                if(enemy is Player)
-                {
-                    break;
-                }
-
-                // Otherwise, let's continue the loop
-                ReturnMessage.Add($"{enemy.Name}'s turn");
-
-                result = enemy.TakeAction(_combatants);
-                ReturnMessage.Add(result.Message);
-
-                ReturnMessage.AddRange(CullEnemies());
-
-                // Check if only player is left (win condition) - an enemy may have
-                // died from a status effect (e.g. poison) ticking on its own turn.
-                if (_combatants.Count == 1)
-                {
-                    _roomEnemies.Clear();
-                    ReturnMessage.Add("Player Wins!");
-                    return new Return(string.Join("\n", ReturnMessage), previous: true);
-                }
-
-                NextTurn();
-            }
-
-            // Add player turn shown. Could add it as a
-            ReturnMessage.Add("Player's Turn");
-
-            return new Return(string.Join("\n", ReturnMessage));
         }
-        catch (CommandException e)
-        {
-            throw new CommandException(e.Message);
-        }
+
+        // Add player turn shown. Could add it as a
+        ReturnMessage.Add("Player's Turn");
+
+        return new Return(string.Join("\n", ReturnMessage), combatants: _combatants);
     }
 
     /// <summary>
@@ -98,7 +94,7 @@ class CombatManager : IState
     public Return Activate()
     {
         List<string> ReturnMessage = [];
-        ReturnMessage.Add($"Entering Combat!\nFighters: {string.Join(", ", _combatants.Select(c => c.Name))}");
+        ReturnMessage.Add($"\nEntering Combat!\nFighters: {string.Join(", ", _combatants.Select(c => c.Name))}");
 
         ICombatant enemy = _combatants[_initiative];
         while (enemy is not Player)
@@ -113,7 +109,7 @@ class CombatManager : IState
 
         ReturnMessage.Add("Player's Turn");
 
-        return new Return(string.Join("\n", ReturnMessage));
+        return new Return(string.Join("\n", ReturnMessage), combatants: _combatants);
     }
 
     private List<ICombatant> _combatants = new();

@@ -1,34 +1,91 @@
 using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
+using Combatants;
+using Returns;
 
 namespace Frontend
 {
     public class Display
     {
+        private readonly BlockingCollection<string> _inputQueue = new();
+        private GameWindow? _window;
+
+        public Display()
+        {
+            using ManualResetEventSlim ready = new();
+
+            Thread uiThread = new(() =>
+            {
+                _window = new GameWindow(_inputQueue);
+                ready.Set();
+                Application.Run(_window);
+            });
+            uiThread.SetApartmentState(ApartmentState.STA);
+            uiThread.IsBackground = true;
+            uiThread.Start();
+
+            ready.Wait();
+        }
 
         /// <summary>
-        /// Renders information to the screen, mainly just a message atm, but
-        /// will add more once we switch up display methods.
+        /// Renders a Return to the screen: its message, plus the side panel
+        /// and the top state bar. The panel shows whichever of Combatants/
+        /// Equipment the Return set - Combatants wins if both are somehow
+        /// set - and falls back to the player's own stats when neither is.
+        /// The state bar shows stateName if one's given, and is otherwise
+        /// left as whatever it was already showing.
         /// </summary>
-        /// <param name="message">String that will be displayed as main message after action</param>
-        public void Render(string message, string end = "\n")
+        /// <param name="response">The Return to display - drives both the message and the side panel</param>
+        /// <param name="player">Player whose info populates the side panel when there's nothing more specific to show</param>
+        /// <param name="stateName">Name of the active state to show in the top bar - Game.cs passes this in directly, since it's a property of the state rather than something a Return carries</param>
+        public void Render(Return response, Player player, string? stateName = null, string end = "\n")
+        {
+            _window!.Invoke(() =>
+            {
+                if (stateName != null)
+                {
+                    _window.UpdateStateBar(stateName);
+                }
+
+                if (response.Combatants is { Count: > 0 })
+                {
+                    _window.ShowCombatPanel(response.Combatants);
+                }
+                else if (response.Equipment == true)
+                {
+                    _window.ShowEquipmentPanel(player);
+                }
+                else
+                {
+                    _window.ShowPlayerPanel(player);
+                }
+            });
+            PrintOut(response.Message + end);
+        }
+
+        /// <summary>
+        /// Prints an error message without touching the side panel - a parse
+        /// or command error mid-combat (or mid-inventory) shouldn't wipe out
+        /// whatever the panel was already showing. It just stays put until
+        /// the next successful Render() explicitly changes it.
+        /// </summary>
+        public void RenderError(string message, string end = "\n")
         {
             PrintOut(message + end);
         }
 
         public string Input()
         {
-            Console.Write("> ");
-            string input = Console.ReadLine() ?? "";
-            return input;
+            return _inputQueue.Take();
         }
 
         public void Exit()
         {
-            Render("Are you sure you want to quit? (y/N)");
+            Render(new Return("Are you sure you want to quit? (y/N)"), Player.Get);
             string response = Input().ToLower();
             if (response == "y")
             {
-                Render("Exiting game...");
+                Render(new Return("Exiting game..."), Player.Get);
                 Environment.Exit(0);
             }
         }
@@ -36,6 +93,13 @@ namespace Frontend
         // Use 12 for game
         private void PrintOut(string message, int sleep = 12)
         {
+            // Typing ahead while the previous message is still animating is
+            // fine, but submitting mid-typewriter let half-printed output get
+            // interleaved with the echoed command. Locking Enter out for the
+            // duration (see OnInputKeyDown) keeps submission from landing
+            // until the text actually finishes printing.
+            _window!.Invoke(() => _window.SetTyping(true));
+
             for (int i = 0; i < message.Length; i++)
             {
                 char c = message[i];
@@ -51,6 +115,8 @@ namespace Frontend
                 _window!.Invoke(() => _window.AppendOutput(c.ToString(), completesLine));
                 Thread.Sleep(sleep);
             }
+
+            _window!.Invoke(() => _window.SetTyping(false));
         }
 
         private sealed class GameWindow : Form
@@ -58,6 +124,11 @@ namespace Frontend
             private readonly RichTextBox _output;
             private readonly TextBox _input;
             private readonly BlockingCollection<string> _inputQueue;
+            private readonly Label _sidePanelText;
+            private readonly Panel _sidePanelContent;
+            private int _sidePanelScroll = 0;
+            private readonly Label _stateBar;
+            private bool _isTyping = false;
 
             public GameWindow(BlockingCollection<string> inputQueue)
             {
@@ -73,9 +144,11 @@ namespace Frontend
                     Dock = DockStyle.Fill,
                     ReadOnly = true,
                     BackColor = Color.Black,
-                    ForeColor = Color.LightGray,
+                    ForeColor = Color.White,
                     Font = new Font("Consolas", 11f),
-                    BorderStyle = BorderStyle.None
+                    BorderStyle = BorderStyle.None,
+                    ScrollBars = RichTextBoxScrollBars.None,
+                    TabStop = false
                 };
                 // RichTextBox doesn't expose DoubleBuffered publicly - it's a
                 // protected Control property - so flip it on via reflection.
@@ -126,6 +199,11 @@ namespace Frontend
                 };
                 _input.KeyDown += OnInputKeyDown;
 
+                // The output log is read-only and auto-scrolls itself - it should
+                // never actually hold focus, whether from a click or a Tab press.
+                // Bouncing focus straight back to the input box on Enter covers both.
+                _output.Enter += (_, _) => _input.Focus();
+
                 TableLayoutPanel inputRow = new()
                 {
                     Dock = DockStyle.Fill,
@@ -147,15 +225,101 @@ namespace Frontend
                 Panel inputPanel = new()
                 {
                     Dock = DockStyle.Bottom,
-                    Height = 36,
+                    Height = 44,
                     BackColor = Color.Black,
-                    Padding = new Padding(12, 6, 12, 6)
+                    Padding = new Padding(12, 14, 12, 6)
                 };
                 inputPanel.Controls.Add(inputRow);
 
-                // Fill control goes in first - it claims whatever space is left
-                // over after the other docked edges are carved out.
-                Controls.Add(outputPanel);
+                // Side panel: shows player info by default, but Render() can
+                // swap it to show combatants or equipment/inventory instead.
+                // The label isn't docked - its Y position is nudged up/down by
+                // hand to scroll, since there's no visible scrollbar to drag.
+                _sidePanelText = new Label
+                {
+                    AutoSize = true,
+                    BackColor = Color.Black,
+                    ForeColor = Color.White,
+                    Font = new Font("Consolas", 11f)
+                };
+
+                // This inner panel is what actually clips the label when it's
+                // taller than the visible area - a plain child control can't
+                // paint outside its parent's bounds, so anything scrolled past
+                // the edge is simply cut off rather than spilling out.
+                _sidePanelContent = new Panel
+                {
+                    Dock = DockStyle.Fill,
+                    BackColor = Color.Black
+                };
+                _sidePanelContent.Controls.Add(_sidePanelText);
+                _sidePanelContent.Resize += (_, _) => LayoutSidePanelText();
+                _sidePanelContent.MouseWheel += OnSidePanelMouseWheel;
+                _sidePanelText.MouseWheel += OnSidePanelMouseWheel;
+
+                Panel sidePanel = new()
+                {
+                    Dock = DockStyle.Right,
+                    Width = 230,
+                    BackColor = Color.Black,
+                    Padding = new Padding(12)
+                };
+                sidePanel.Controls.Add(_sidePanelContent);
+
+                Color dividerColor = Color.FromArgb(60, 60, 60);
+                Panel rightDivider = new() { Dock = DockStyle.Right, Width = 1, BackColor = dividerColor };
+                Panel bottomDivider = new() { Dock = DockStyle.Bottom, Height = 1, BackColor = dividerColor };
+
+                // Top bar: shows the active state's name (room, "Inventory",
+                // "Combat", etc). Game.cs passes the name in on each Render -
+                // it isn't carried on Return, since it comes from the state
+                // itself rather than anything a state's Execute() produces.
+                _stateBar = new Label
+                {
+                    Dock = DockStyle.Fill,
+                    TextAlign = ContentAlignment.MiddleLeft,
+                    BackColor = Color.Black,
+                    ForeColor = Color.White,
+                    Font = new Font("Consolas", 14f, FontStyle.Bold)
+                };
+
+                Panel topBar = new()
+                {
+                    Dock = DockStyle.Top,
+                    Height = 44,
+                    BackColor = Color.Black,
+                    Padding = new Padding(12, 6, 12, 6)
+                };
+                topBar.Controls.Add(_stateBar);
+
+                Panel topDivider = new() { Dock = DockStyle.Top, Height = 1, BackColor = dividerColor };
+
+                // The bar is scoped to the output column only (not the full
+                // window width) by nesting it - along with outputPanel - inside
+                // its own Fill container, rather than docking it to the Form
+                // directly. If it docked to the Form, it'd resolve before the
+                // side panel and stretch across the top of it too.
+                Panel mainColumn = new()
+                {
+                    Dock = DockStyle.Fill,
+                    BackColor = Color.Black
+                };
+                mainColumn.Controls.Add(outputPanel);
+                mainColumn.Controls.Add(topDivider);
+                mainColumn.Controls.Add(topBar);
+
+                // Controls are docked in reverse of add order (last added is on
+                // top of the z-order and gets first pick of space), and the Fill
+                // control must resolve last so it soaks up whatever remains.
+                // Resolve order: inputPanel (Bottom) -> bottomDivider (Bottom,
+                // spans full width above input) -> sidePanel (Right) ->
+                // rightDivider (Right, between output and side panel) ->
+                // mainColumn (Fill, whatever's left - topBar/topDivider then
+                // resolve within it the same way). Add order is the reverse.
+                Controls.Add(mainColumn);
+                Controls.Add(rightDivider);
+                Controls.Add(sidePanel);
+                Controls.Add(bottomDivider);
                 Controls.Add(inputPanel);
 
                 Shown += (_, _) => _input.Focus();
@@ -172,6 +336,15 @@ namespace Frontend
                 // Stop the Enter key from dinging/adding a newline into the box.
                 e.SuppressKeyPress = true;
 
+                // Typing ahead is fine, but submitting while the previous
+                // message is still animating out interleaves the echoed
+                // command with whatever's mid-typewriter. Just swallow Enter
+                // until PrintOut says it's done.
+                if (_isTyping)
+                {
+                    return;
+                }
+
                 string text = _input.Text;
                 _input.Clear();
 
@@ -181,10 +354,76 @@ namespace Frontend
                 _inputQueue.TryAdd(text);
             }
 
+            public void SetTyping(bool typing)
+            {
+                _isTyping = typing;
+            }
+
+            public void UpdateStateBar(string stateName)
+            {
+                _stateBar.Text = stateName;
+            }
+
+            public void ShowPlayerPanel(Player p)
+            {
+                SetPanelText($"{p.Name}\nLevel {p.Level}\nHP: {p.CurrHealth}/{p.MaxHealth}\n\n{p.Stats.Status()}");
+            }
+
+            public void ShowCombatPanel(List<ICombatant> combatants)
+            {
+                SetPanelText(string.Join(
+                    "\n\n",
+                    combatants.Select(c => $"{c.Name}\nLvl {c.Level} {Regex.Replace(c.GetType().Name, @"(?<!^)(?=[A-Z])", " ")}\n{c.CurrHealth}/{c.MaxHealth}")));
+            }
+
+            public void ShowEquipmentPanel(Player p)
+            {
+                SetPanelText($"{p.Name}\nLevel {p.Level}\nHP: {p.CurrHealth}/{p.MaxHealth}\n\n{p.Equipment.Status()}");
+            }
+
+            // Whenever the panel's content is replaced outright (switching
+            // between player/combat/equipment views), snap back to the top -
+            // an old scroll offset from a totally different view is just confusing.
+            private void SetPanelText(string text)
+            {
+                _sidePanelText.Text = text;
+                _sidePanelScroll = 0;
+                LayoutSidePanelText();
+            }
+
+            // Wraps the label to the panel's current width and re-applies the
+            // scroll offset, clamping it so we can't scroll past either end.
+            private void LayoutSidePanelText()
+            {
+                int width = Math.Max(_sidePanelContent.ClientSize.Width, 1);
+                _sidePanelText.MaximumSize = new Size(width, 0);
+
+                int minScroll = Math.Min(0, _sidePanelContent.ClientSize.Height - _sidePanelText.Height);
+                _sidePanelScroll = Math.Clamp(_sidePanelScroll, minScroll, 0);
+                _sidePanelText.Location = new Point(0, _sidePanelScroll);
+            }
+
+            private void OnSidePanelMouseWheel(object? sender, MouseEventArgs e)
+            {
+                _sidePanelScroll += Math.Sign(e.Delta) * _sidePanelText.Font.Height * 3;
+                LayoutSidePanelText();
+            }
+
             public void AppendOutput(string text, bool scroll)
             {
                 _output.AppendText(text);
-                if (scroll)
+
+                // A long line (no '\n' inside it) can word-wrap past the bottom
+                // of the visible view before it "completes", so text keeps
+                // typing out below the fold and stays hidden until the line
+                // finishes. Checking where the caret actually landed - and
+                // scrolling the moment it drops below the viewport - catches
+                // that case without forcing a scroll on every character (which
+                // is what caused the jitter this flag was introduced to avoid).
+                Point caretPos = _output.GetPositionFromCharIndex(Math.Max(_output.TextLength - 1, 0));
+                bool caretBelowView = caretPos.Y >= _output.ClientSize.Height - _output.Font.Height;
+
+                if (scroll || caretBelowView)
                 {
                     _output.SelectionStart = _output.Text.Length;
                     _output.ScrollToCaret();

@@ -11,6 +11,8 @@ namespace Testing
 
         public static TestRoom Get => Instance;
 
+        public string Name => "Test Room";
+
         public Return Execute(Command command)
         {
             if (command.Verb == "switch" && command.Noun == "state")
@@ -31,6 +33,8 @@ namespace Testing
         private TestRoom2() {}
 
         public static TestRoom2 Get => Instance;
+
+        public string Name => "Test Room 2";
 
         bool testing = false;
 

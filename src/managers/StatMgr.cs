@@ -37,7 +37,7 @@ namespace Stats
             var lines = Enum.GetValues<StatType>()
                 .Select(stat => $"  {stat}: {Get(stat)}");
 
-            return "Stats:\n" + string.Join('\n', lines) + '\n';
+            return $"Stats:\n{string.Join('\n', lines)}";
         }
     }
 }

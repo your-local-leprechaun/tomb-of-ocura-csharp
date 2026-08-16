@@ -7,13 +7,15 @@ using State;
 
 public class BedState : IState
 {
+    public string Name => "Rest";
+
     public Return Execute(Command command)
     {
         if (command == new Command("leave", "bed"))
         {
             return new Return("You get out of bed, ready for the challenge.", previous: true);
         }
-        throw new CommandException("--Unknown Error--");
+        throw new UnknownCommandException(command);
     }
 
     public Return Activate()

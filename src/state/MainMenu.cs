@@ -5,6 +5,8 @@ using State;
 
 public class MainMenu : IState
 {
+    public string Name => "The Tomb of Ocura";
+
     public Return Execute(Command command)
     {
         if (command.Verb == "start" && command.Noun == "game")

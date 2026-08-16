@@ -13,6 +13,26 @@ namespace Parser
         public CommandException(string message) : base(message) {}
     }
 
+    /// <summary>A verb/noun pair that no active handler recognizes.</summary>
+    public class UnknownCommandException : CommandException
+    {
+        public UnknownCommandException(Command command)
+            : base($"--Unable to '{command.Verb} {command.Noun}' right now--") {}
+    }
+
+    /// <summary>A command referenced something (an enemy, an item) that isn't there to target.</summary>
+    public class InvalidTargetException : CommandException
+    {
+        public InvalidTargetException(string target)
+            : base($"--Invalid Target: '{target}'") {}
+    }
+
+    /// <summary>The command was understood, but can't be carried out right now (already holding, nothing equipped, etc).</summary>
+    public class InvalidActionException : CommandException
+    {
+        public InvalidActionException(string message) : base(message) {}
+    }
+
     public sealed class Parser
     {
         // Storage of all possible words to be used!

@@ -6,7 +6,7 @@ using Parser;
 using Enemies;
 using Items.Equipment;
 
-public class Player : CombatantBase, ICombatant
+public class Player : CombatantBase
 {
     public int PlayerExperience = 0;
     private static Player? instance;
@@ -27,6 +27,7 @@ public class Player : CombatantBase, ICombatant
     private Player() : base(
         "Jaymie",
         10,
+        1,
         0,
         new Dictionary<StatType, int>
         {
@@ -39,7 +40,7 @@ public class Player : CombatantBase, ICombatant
         new Dictionary<EquipType, IEquipment>
         {
             // Debug gear for testing combat without walking to the item each run.
-            // { EquipType.Melee, new MeleeBase("Debug Sword", "A sword for debuggers", 99, 4, 6) { IsEquipped = true } },
+            // { EquipType.Melee, new MeleeBase("Debug Sword", "A sword for debuggers", 99, 4, 20) { IsEquipped = true } },
             { EquipType.Spell, new PoisonMist() }
             // { EquipType.Chest, new ArmorBase("Debug Chest", "A chestplate for debugging", EquipType.Chest, 10) { IsEquipped = true } }
         }
@@ -67,7 +68,7 @@ public class Player : CombatantBase, ICombatant
 
             if (enemy is null)
             {
-                throw new CommandException("--Unknown Target--");
+                throw new InvalidTargetException(command.Noun);
             }
 
             // Enemy is in target range! Try to hit, and then damage if we do hit! This is for melee only
@@ -78,7 +79,7 @@ public class Player : CombatantBase, ICombatant
             // Now that we have our melee weapon, let's swing to see if we hit the creature.
             if (!(weapon.TryHit() || _hold))
             {
-                return new Return($"Player misses {enemy.Name} using {weapon.ItemName}");
+                return new Return($"Player misses {enemy.Name} using {weapon.ItemName}", combatants: combatants);
             }
             _hold = false;
 
@@ -89,15 +90,15 @@ public class Player : CombatantBase, ICombatant
             if (enemy.CurrHealth <= 0)
             {
                 PlayerExperience += enemy.Experience;
-                return new Return($"Player kills {enemy.Name}. {enemy.Experience}xp gained.");
+                return new Return($"Player kills {enemy.Name}. {enemy.Experience}xp gained.", combatants: combatants);
             }
 
-            return new Return($"Player hits {enemy.Name} for {dealtDamage}\n{enemy.Name} HP({enemy.CurrHealth}/{enemy.MaxHealth})");
+            return new Return($"Player hits {enemy.Name} for {dealtDamage}", combatants: combatants);
         }
         else if (command == new Command("hold", "action"))
         {
             Hold();
-            return new Return($"Player preps for their next attack.");
+            return new Return($"Player preps for their next attack.", combatants: combatants);
         }
         else if (command.Verb == "check")
         {
@@ -105,10 +106,10 @@ public class Player : CombatantBase, ICombatant
 
             if (enemy is null)
             {
-                throw new CommandException("--Unknown Target--");
+                throw new InvalidTargetException(command.Noun);
             }
 
-            return new Return(enemy.Status(), earlyReturn: true);
+            return new Return(enemy.Status(), earlyReturn: true, combatants: combatants);
         }
         else if (command.Verb == "cast")
         {
@@ -116,7 +117,7 @@ public class Player : CombatantBase, ICombatant
 
             if (enemy is null)
             {
-                throw new CommandException("--Unknown Target--");
+                throw new InvalidTargetException(command.Noun);
             }
 
             // Grab our current spell
@@ -124,15 +125,15 @@ public class Player : CombatantBase, ICombatant
 
             if (spell is null)
             {
-                throw new CommandException("--No Spell Equipped--");
+                throw new InvalidActionException("You don't have a spell equipped.");
             }
 
             // Put spell on enemy now
             enemy.Conditions.Apply(spell.Status);
 
-            return new Return($"{enemy.Name} has been {spell.Status.Name}!");
+            return new Return($"{enemy.Name} has been {spell.Status.Name}!", combatants: combatants);
         }
 
-        throw new CommandException("--Unknown Command--");
+        throw new UnknownCommandException(command);
     }
 }

@@ -7,8 +7,8 @@ namespace Main
 {
     public class Game
     {
-        // IState _activeState = new MainMenu();
-        IState _activeState = Rooms.Room2.Get;
+        IState _activeState = new MainMenu();
+        // IState _activeState = Rooms.Room2.Get;
         IState? _previousState = null;
         Parser.Parser parser = new Parser.Parser();
         Frontend.Display Display = new Frontend.Display();
@@ -36,7 +36,7 @@ namespace Main
                         Quit();
                         continue;
                     }
-                    else if (command.Verb == "status" && command.Noun == "player")
+                    else if (command == new Command("status", "player"))
                     {
                         Player player = Player.Get;
                         response = player.Status();
@@ -48,7 +48,7 @@ namespace Main
                     }
 
                     // Display message
-                    Display.Render(response.Message);
+                    Display.Render(response, Player.Get, _activeState.Name);
 
                     // Update state if needed (loop in case Activate() itself
                     // triggers another transition, e.g. entering a room with enemies)
@@ -57,7 +57,7 @@ namespace Main
                         _previousState = _activeState;
                         _activeState = response.UpdateState;
                         response = _activeState.Activate();
-                        Display.Render(response.Message);
+                        Display.Render(response, Player.Get, _activeState.Name);
                     }
 
                     // Return to Previous State
@@ -67,17 +67,17 @@ namespace Main
                         _activeState = _previousState;
                         _previousState = temp;
                         response = _activeState.Activate();
-                        Display.Render(response.Message);
+                        Display.Render(response, Player.Get, _activeState.Name);
                     }
                 }
                 catch (ParseException e)
                 {
-                    Display.Render(e.Message);
+                    Display.RenderError(e.Message);
                     continue;
                 }
                 catch (CommandException e)
                 {
-                    Display.Render(e.Message);
+                    Display.RenderError(e.Message);
                     continue;
                 }
             }
@@ -86,14 +86,14 @@ namespace Main
         public void Start()
         {
             Return response = _activeState.Activate();
-            Display.Render(response.Message);
+            Display.Render(response, Player.Get, _activeState.Name);
 
             while (response.UpdateState is not null)
             {
                 _previousState = _activeState;
                 _activeState = response.UpdateState;
                 response = _activeState.Activate();
-                Display.Render(response.Message);
+                Display.Render(response, Player.Get, _activeState.Name);
             }
 
             GameLoop();
@@ -101,7 +101,7 @@ namespace Main
 
         public void Quit()
         {
-            Display.Render("Are you sure you want to quit? (y/N)");
+            Display.Render(new Return("Are you sure you want to quit? (y/N)"), Player.Get);
             string response = Display.Input().ToLower();
             while (true)
             {
@@ -109,7 +109,7 @@ namespace Main
                 {
                     return;
                 }
-                Display.Render("Exiting game...");
+                Display.Render(new Return("Exiting game..."), Player.Get);
                 Environment.Exit(0);
             }
         }

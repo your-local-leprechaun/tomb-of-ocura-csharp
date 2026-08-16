@@ -17,7 +17,6 @@ namespace Rooms
             RegisterHandler(new Command("move", "west"), MoveWest);
 
             // Add OG Items
-            AddItem(new BrokenBreastplate());
 
             // Add Enemies
             Respawn();

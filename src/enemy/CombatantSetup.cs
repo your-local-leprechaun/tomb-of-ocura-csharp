@@ -1,6 +1,7 @@
 
 using Commands;
 using Items.Equipment;
+using Parser;
 using Returns;
 using Stats;
 
@@ -11,6 +12,7 @@ namespace Combatants
         string Name { get; }
         int MaxHealth { get; }
         int CurrHealth { get; }
+        int Level { get; }
         int Experience { get; }
         StatManager Stats { get; }
         EquipmentManager Equipment { get; }
@@ -24,13 +26,14 @@ namespace Combatants
         Return TakeAction(List<ICombatant> combatants);
     }
 
-    public class CombatantBase
+    public class CombatantBase : ICombatant
     {
-        public CombatantBase(string name, int maxHealth, int experience, IDictionary<StatType, int>? initialStats = null, IDictionary<EquipType, IEquipment>? initialEquipment = null)
+        public CombatantBase(string name, int maxHealth, int level, int experience, IDictionary<StatType, int>? initialStats = null, IDictionary<EquipType, IEquipment>? initialEquipment = null)
         {
             Name = name;
             MaxHealth = maxHealth;
             CurrHealth = MaxHealth;
+            Level = level;
             Experience = experience;
             Stats = new StatManager(initialStats);
             Equipment = new EquipmentManager(initialEquipment);
@@ -40,6 +43,7 @@ namespace Combatants
         public string Name { get; set; }
         public int MaxHealth { get; set; }
         public int CurrHealth { get; set; }
+        public int Level { get; set; } = 1;
         public int Experience { get; set; }
         protected bool _hold = false;
 
@@ -81,7 +85,7 @@ namespace Combatants
         {
             if (_hold == true)
             {
-                throw new Exception("-Already Holding-");
+                throw new InvalidActionException("You're already holding your action.");
             }
             _hold = true;
         }

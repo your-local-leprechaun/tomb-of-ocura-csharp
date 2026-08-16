@@ -1,4 +1,5 @@
 using System.Runtime;
+using System.Text.RegularExpressions;
 using Combatants;
 using Commands;
 using Items;
@@ -11,7 +12,6 @@ namespace Enemies
     public interface IEnemy : ICombatant
     {
         string Description { get; }
-        int Level { get; }
         string Status();
         List<IItem> RollDrops();
     }
@@ -31,7 +31,6 @@ namespace Enemies
     public class EnemyBase : CombatantBase, IEnemy, ICombatant
     {
         public string Description { get; init; }
-        public int Level { get; init; } = 1;
 
         // The moves an enemy can choose between on its turn. Override per-enemy.
         protected virtual List<EnemyMove> Moves { get; } = new();
@@ -56,9 +55,8 @@ namespace Enemies
             int experience,
             IDictionary<StatType, int> initialStats,
             IDictionary<EquipType, IEquipment>? initialEquipment = null
-        ) : base(name, maxHealth, experience, initialStats, initialEquipment)
+        ) : base(name, maxHealth, level, experience, initialStats, initialEquipment)
         {
-            Level = level;
             Description = description;
             Parser.Parser.RegisterNoun(name);
         }
@@ -84,7 +82,7 @@ namespace Enemies
 
         public string Status()
         {
-            string status = $"{Name}\nLvl {Level} {GetType().Name}\nHealth: {CurrHealth}/{MaxHealth}";
+            string status = $"{Name}\nLvl {Level} {Regex.Replace(GetType().Name, @"(?<!^)(?=[A-Z])", " ")}\nHealth: {CurrHealth}/{MaxHealth}";
 
             var equipped = Equipment.EquippedItems.Values.Where(item => item != null);
             if (equipped.Any())
@@ -121,7 +119,7 @@ namespace Enemies
             int dealtDamage = Player.Get.Damage(damage);
             if (dealtDamage != 0)
             {
-                return new Return($"{Name} hits Player with {move.Name} for {dealtDamage}!\nPlayer HP ({Player.Get.CurrHealth}/{Player.Get.MaxHealth})");
+                return new Return($"{Name} hits Player with {move.Name} for {dealtDamage}!");
             }
             return new Return($"{Name} hits Player with {move.Name}, but deals no damage!");
         }

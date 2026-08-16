@@ -1,4 +1,6 @@
 
+using Combatants;
+
 namespace Returns
 {
     public class Return
@@ -9,8 +11,16 @@ namespace Returns
 
         public bool? Previous { get; init; } = null;
         public bool? EarlyReturn { get; init; } = null;
+        public List<ICombatant>? Combatants { get; init; } = null;
+        public bool? Equipment { get; init; } = null;
 
-        public Return (string message, State.IState? state = null, bool? previous = null, bool? earlyReturn = null)
+        public Return (
+            string message,
+            State.IState? state = null,
+            bool? previous = null,
+            bool? earlyReturn = null,
+            List<ICombatant>? combatants = null,
+            bool? equipment = null)
         {
             Message = message;
             if (state != null)
@@ -24,6 +34,14 @@ namespace Returns
             if (earlyReturn != null)
             {
                 EarlyReturn = earlyReturn;
+            }
+            if (combatants != null)
+            {
+                Combatants = combatants;
+            }
+            if (equipment != null)
+            {
+                Equipment = equipment;
             }
         } 
     }

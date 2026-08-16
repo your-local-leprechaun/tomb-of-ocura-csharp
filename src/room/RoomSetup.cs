@@ -34,12 +34,14 @@ namespace Rooms
             
             // Shared Choices
             RegisterHandler(new Command("show", "room"), () => new Return(Description), showChoice: false);
-            RegisterHandler(new Command("open", "inventory"), () => new Return("Opening Inventory...", Inventory.Get), showChoice: false);
+            RegisterHandler(new Command("open", "inventory"), () => new Return("", Inventory.Get), showChoice: false);
             RegisterHandler(new Command("check", "choices"), () => new Return(string.Join("\n", Choices)), showChoice: false);
             RegisterHandler(new Command("status", "room"), RoomVitals, showChoice: false);
         }
 
         public static T Get => Instance;
+
+        public string Name => RoomName;
 
         // State Information
         public Return Execute(Command command)
@@ -50,7 +52,7 @@ namespace Rooms
             }
 
             // Return an Unknown
-            throw new CommandException("--Unknown Command--");
+            throw new UnknownCommandException(command);
         }
 
         public virtual Return Activate()
@@ -60,11 +62,11 @@ namespace Rooms
             {
 
                 // Start a Combat instance with Enemies
-                return new Return($"Entering {RoomName}, you find a fight!", new CombatManager(Enemies));
+                return new Return($"\nEntering {RoomName}, you find enemies!", new CombatManager(Enemies));
             }
 
             // Else Return the normal description stuff.
-            return new Return(RoomName + "\n" + Description);
+            return new Return("\n" + Description);
         }
 
         // Room Information

@@ -19,34 +19,44 @@ public class Inventory : Singleton<Inventory>, IState
 
     public static Inventory Get => Instance;
 
+    public string Name => "Inventory";
+
     // State Stuff
     public Return Execute(Command command)
     {
+        string message = "";
+
         if (command.Verb == "close" && command.Noun == "inventory")
         {
             return new Return("Closing inventory...", previous: true);
         }
         else if (command == new Command("show", "inventory") || command == new Command("show", "items"))
         {
-            return ListItems();
+            message = ListItems().Message;
         }
         else if (command.Verb == "check")
         {
-            return ExamineItem(command);
+            message = ExamineItem(command).Message;
         }
         else if (command.Verb == "equip")
         {
-            return EquipItem(command);
+            message = EquipItem(command).Message;
         }
         else if (command.Verb == "unequip")
         {
-            return UnequipItem(command);
+            message = UnequipItem(command).Message;
         }
         else if (command.Verb == "use")
         {
-            return UseConsumable(command);
+            message = UseConsumable(command).Message;
         }
-        throw new CommandException("--Unknown Command--");
+        else
+        {
+            throw new UnknownCommandException(command);
+        }
+
+        // Return actual Return
+        return new Return(message, equipment: true);
     }
 
     private Return ExamineItem(Command command)
@@ -135,7 +145,7 @@ public class Inventory : Singleton<Inventory>, IState
 
         if (item is null)
         {
-            throw new CommandException("No consumable found!");
+            throw new InvalidTargetException(searchName);
         }
 
         return item.Consume();
@@ -143,12 +153,12 @@ public class Inventory : Singleton<Inventory>, IState
 
     public Return Activate()
     {
-        return ListItems();
+        return new Return(ListItems().Message, equipment: true);
     }
 
     private Return ListItems()
     {
-        string itemList = "Inventory";
+        string itemList = "Storage:";
 
         foreach (var group in _storage.GroupBy(i => i.ItemName))
         {
@@ -156,12 +166,12 @@ public class Inventory : Singleton<Inventory>, IState
             {
                 foreach (IItem item in group)
                 {
-                    itemList += $"\n  {item.ItemName}" + (item is IEquipment equip && equip.IsEquipped ? "*" : "");
+                    itemList += $"\n {item.ItemName}" + (item is IEquipment equip && equip.IsEquipped ? "*" : "");
                 }
             }
             else
             {
-                itemList += $"\n  {group.Key} x{group.Count()}";
+                itemList += $"\n {group.Key} x{group.Count()}";
             }
         }
 
