@@ -10,6 +10,10 @@ using Stats;
 class CombatManager : IState
 {
     public string Name => "Combat";
+    private List<ICombatant> _combatants = new();
+    private readonly List<ICombatant> _roomEnemies;
+    private int _initiative = 0;
+    private bool _browsingInventory = false;
 
     /// <summary>
     /// So this one is a bit more complex. We take in a command, attacking (Melee or magic), holding,
@@ -26,140 +30,125 @@ class CombatManager : IState
     {
         List<string> ReturnMessage = [];
 
-        // Take in Player Action (a combat command, or an inventory action taken as the turn)
-        Return result = HandlePlayerCommand(command);
-
-        // Add to Return Message
-        ReturnMessage.Add(result.Message);
-
-        if (result.EarlyReturn == true)
+        // Player Input is taken in, player turn
+        if (command != new Command("skip", "input"))
         {
-            return result.Equipment == true
-                ? new Return(string.Join("\n", ReturnMessage), equipment: true)
-                : new Return(string.Join("\n", ReturnMessage), combatants: _combatants);
+            // If Inventory is open, do inventory stuff
+            if (_browsingInventory)
+            {
+                if (command.Verb == "check" && !_combatants.Any(c => c.Name.ToLower() == command.Noun))
+                {
+                    return new Return(Inventory.Get.Examine(command).Message, earlyReturn: true, equipment: true);
+                }
+                else if (command == new Command("close", "inventory"))
+                {
+                    _browsingInventory = false;
+                    return new Return("You tuck your things away and refocus on the fight.", earlyReturn: true, combatants: _combatants);
+                }
+                else if (command.Verb == "equip")
+                {
+                    _browsingInventory = false;
+                    ReturnMessage.Add(Inventory.Get.Equip(command).Message);
+                }
+                else if (command.Verb == "unequip")
+                {
+                    _browsingInventory = false;
+                    ReturnMessage.Add(Inventory.Get.Unequip(command).Message);
+                }
+                else if (command.Verb == "use")
+                {
+                    _browsingInventory = false;
+                    ReturnMessage.Add(Inventory.Get.Use(command).Message);
+                }
+                else
+                {
+                    throw new CommandException("-Unknown Inventory Action-");
+                }
+            }
+            else
+            {
+                // Outside of combat inventory actions
+                if (command == new Command("open", "inventory") ||
+                command == new Command("show", "inventory") ||
+                command == new Command("show", "items"))
+                {
+                    _browsingInventory = true;
+                    return new Return(Inventory.Get.List().Message, earlyReturn: true, equipment: true);
+                }
+                else if (command.Verb == "check" && _combatants.Any(c => c.Name.ToLower() == command.Noun))
+                {
+                    IEnemy enemy = (IEnemy)_combatants.First(c => c.Name.ToLower() == command.Noun);
+                    return new Return(enemy.Status(), earlyReturn: true, combatants: _combatants);
+                }
+
+                Return result = Player.Get.PlayerAction(command, _combatants);
+
+                // Add to Return Message
+                ReturnMessage.Add(result.Message);
+
+                if (result.EarlyReturn == true)
+                {
+                    return result.Equipment == true
+                        ? new Return(string.Join("\n", ReturnMessage), equipment: true)
+                        : new Return(string.Join("\n", ReturnMessage), combatants: _combatants);
+                }
+
+                // Check if only player is left (win condition)
+                if (_combatants.Count == 1)
+                {
+                    _roomEnemies.Clear();
+                    ReturnMessage.Add("Player Wins!");
+                    return new Return(string.Join("\n", ReturnMessage), previous: true);
+                }
+            }
+        }
+        // Enemy turn is "skip input" was shown
+        else
+        {
+            IEnemy? enemy = _combatants[_initiative] as IEnemy;
+
+            if (enemy == null)
+            {
+                throw new Exception("No Enemy");
+            }
+
+            Return result = enemy.TakeAction(_combatants);
+
+            ReturnMessage.Add(result.Message);
         }
 
-        ReturnMessage.AddRange(CullEnemies());
+        CullEnemies();
 
-        // Check if only player is left (win condition)
-        if (_combatants.Count == 1)
+        // Check for win condition
+        if (_combatants.Count() == 1)
         {
-            // Defeated enemies are gone for good, so clear them from the room
-            // that spawned this fight or it'll trigger combat again on re-entry.
             _roomEnemies.Clear();
             ReturnMessage.Add("Player Wins!");
             return new Return(string.Join("\n", ReturnMessage), previous: true);
         }
 
+        // Check if death condition
+        if (Player.Get.CurrHealth <= 0)
+        {
+            ReturnMessage.Add("\n**YOU DIED**\n");
+            return new Return(string.Join("\n", ReturnMessage), new DeathState());
+        }
+
         NextTurn();
 
-        // Loop through list till Player is active again.
-        while (true)
+        bool SkipInput = false;
+        // Add next turn to return message and set if enemy continues
+        if (_combatants[_initiative] == Player.Get)
         {
-            ICombatant enemy = _combatants[_initiative];
-            // If we've gotten back to Player, break free and return all attacks
-            if(enemy is Player)
-            {
-                break;
-            }
-
-            // Otherwise, let's continue the loop
-            ReturnMessage.Add($"{enemy.Name}'s turn");
-
-            result = enemy.TakeAction(_combatants);
-            ReturnMessage.Add(result.Message);
-
-            ReturnMessage.AddRange(CullEnemies());
-
-            // Check if the player is dead
-            if (Player.Get.CurrHealth <= 0)
-            {
-                ReturnMessage.Add("\n**YOU DIED**\n");
-                return new Return(string.Join("\n", ReturnMessage), new DeathState());
-            }
-
-            // Check if only player is left (win condition) - an enemy may have
-            // died from a status effect (e.g. poison) ticking on its own turn.
-            if (_combatants.Count == 1)
-            {
-                _roomEnemies.Clear();
-                ReturnMessage.Add("Player Wins!");
-                return new Return(string.Join("\n", ReturnMessage), previous: true);
-            }
-
-            NextTurn();
+            ReturnMessage.Add("Player's Turn");
+        }
+        else
+        {
+            SkipInput = true;
+            ReturnMessage.Add($"{_combatants[_initiative].Name}'s turn");
         }
 
-        // Add player turn shown. Could add it as a
-        ReturnMessage.Add("Player's Turn");
-
-        return new Return(string.Join("\n", ReturnMessage), combatants: _combatants);
-    }
-
-    /// <summary>
-    /// Routes a command to either combat (attack/hold/check enemy/cast) or the inventory
-    /// (equip/unequip/use). Opening the inventory to look around and checking an item are
-    /// free (EarlyReturn); equipping, unequipping, and using a consumable cost the player's turn,
-    /// same as an attack would.
-    ///
-    /// While "browsing" (after "open inventory", before "close inventory") combat commands
-    /// are blocked entirely - same as the standalone Inventory state, you have to close it
-    /// before you can act again.
-    /// </summary>
-    private Return HandlePlayerCommand(Command command)
-    {
-        if (command == new Command("open", "inventory") ||
-            command == new Command("show", "inventory") ||
-            command == new Command("show", "items"))
-        {
-            _browsingInventory = true;
-            return new Return(Inventory.Get.List().Message, earlyReturn: true, equipment: true);
-        }
-
-        if (command == new Command("close", "inventory"))
-        {
-            _browsingInventory = false;
-            return new Return("You tuck your things away and refocus on the fight.", earlyReturn: true, combatants: _combatants);
-        }
-
-        // "check" is ambiguous between an enemy and an inventory item - if the name
-        // doesn't match a combatant, fall back to examining an item instead.
-        if (command.Verb == "check" && !_combatants.Any(c => c.Name.ToLower() == command.Noun))
-        {
-            return new Return(
-                Inventory.Get.Examine(command).Message,
-                earlyReturn: true,
-                combatants: _browsingInventory ? null : _combatants,
-                equipment: _browsingInventory ? true : null);
-        }
-
-        // Equipping/unequipping/using a consumable is always allowed as the player's action -
-        // whether or not you bothered to "open inventory" first - and it ends any browsing,
-        // since the turn is about to resolve and combat resumes.
-        if (command.Verb == "equip")
-        {
-            _browsingInventory = false;
-            return new Return(Inventory.Get.Equip(command).Message, combatants: _combatants);
-        }
-
-        if (command.Verb == "unequip")
-        {
-            _browsingInventory = false;
-            return new Return(Inventory.Get.Unequip(command).Message, combatants: _combatants);
-        }
-
-        if (command.Verb == "use")
-        {
-            _browsingInventory = false;
-            return new Return(Inventory.Get.Use(command).Message, combatants: _combatants);
-        }
-
-        if (_browsingInventory)
-        {
-            throw new InvalidActionException("Close your inventory before doing that.");
-        }
-
-        return Player.Get.PlayerAction(command, _combatants);
+        return new Return(string.Join("\n", ReturnMessage), combatants: _combatants, skipInput: SkipInput);
     }
 
     /// <summary>
@@ -169,7 +158,7 @@ class CombatManager : IState
     public Return Activate()
     {
         List<string> ReturnMessage = [];
-        ReturnMessage.Add($"\nEntering Combat!\nFighters: {string.Join(", ", _combatants.Select(c => c.Name))}");
+        ReturnMessage.Add($"\nEntering Combat!");
 
         ICombatant enemy = _combatants[_initiative];
         while (enemy is not Player)
@@ -186,11 +175,6 @@ class CombatManager : IState
 
         return new Return(string.Join("\n", ReturnMessage), combatants: _combatants);
     }
-
-    private List<ICombatant> _combatants = new();
-    private readonly List<ICombatant> _roomEnemies;
-    private int _initiative = 0;
-    private bool _browsingInventory = false;
 
     public CombatManager(List<ICombatant> enemies)
     {

@@ -40,7 +40,7 @@ public class Player : CombatantBase
         new Dictionary<EquipType, IEquipment>
         {
             // Debug gear for testing combat without walking to the item each run.
-            { EquipType.Melee, new MeleeBase("Debug Sword", "A sword for debuggers", 99, 4, 20) { IsEquipped = true } },
+            // { EquipType.Melee, new MeleeBase("Debug Sword", "A sword for debuggers", 99, 4, 20) { IsEquipped = true } },
             { EquipType.Spell, new PoisonMist() }
             // { EquipType.Chest, new ArmorBase("Debug Chest", "A chestplate for debugging", EquipType.Chest, 10) { IsEquipped = true } }
         }

@@ -1,0 +1,8 @@
+{
+  "ItemTypes": [],
+  "Flags": [
+    "GrabKey",
+    "OpenDoor",
+    "CheckHay"
+  ]
+}

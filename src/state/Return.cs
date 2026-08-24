@@ -12,6 +12,7 @@ namespace Returns
 
         public bool? Previous { get; init; } = null;
         public bool? EarlyReturn { get; init; } = null;
+        public bool? SkipInput { get; init; } = null;
         public List<ICombatant>? Combatants { get; init; } = null;
         public bool? Equipment { get; init; } = null;
         public bool? Checkpoint { get; init; } = null;
@@ -21,6 +22,7 @@ namespace Returns
             State.IState? state = null,
             bool? previous = null,
             bool? earlyReturn = null,
+            bool? skipInput = null,
             List<ICombatant>? combatants = null,
             bool? equipment = null,
             bool? checkpoint = null)
@@ -37,6 +39,10 @@ namespace Returns
             if (earlyReturn != null)
             {
                 EarlyReturn = earlyReturn;
+            }
+            if (skipInput != null)
+            {
+                SkipInput = skipInput;
             }
             if (combatants != null)
             {

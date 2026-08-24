@@ -5,10 +5,23 @@ using Basic;
 using Parser;
 using State;
 using System.Text;
+using System.Runtime.CompilerServices;
 using Combatants;
+using Stats;
 
 namespace Rooms
 {
+    /// <summary>
+    /// What gets written to / read from the save file for a single room.
+    /// ItemTypes/Flags are plain strings so this round-trips through JSON with
+    /// no custom converters needed.
+    /// </summary>
+    public class RoomSaveData
+    {
+        public List<string> ItemTypes { get; set; } = [];
+        public List<string> Flags { get; set; } = [];
+    }
+
     public interface IRoom
     {
         string Description { get; }
@@ -17,6 +30,8 @@ namespace Rooms
         bool NeedsRespawn { get; }
         void Respawn();
         void ClearEnemies();
+        RoomSaveData Save();
+        void Load(RoomSaveData data);
     }
 
     public class RoomBase<T> : Singleton<T>, IState, IRoom
@@ -29,7 +44,7 @@ namespace Rooms
         {
             RoomName = roomName;
             Description = description;
-            
+
             // Shared Choices
             RegisterHandler(new Command("show", "room"), () => new Return(Description), showChoice: false);
             RegisterHandler(new Command("open", "inventory"), () => new Return("", Inventory.Get), showChoice: false);
@@ -58,9 +73,16 @@ namespace Rooms
             // If Enemies are in the room, start a battle.
             if (Enemies.Count > 0)
             {
+                List<ICombatant> combatants = [];
+                combatants.AddRange(Enemies);
+                combatants.Add(Player.Get);
+
+                combatants = combatants
+                    .OrderByDescending(c => c.Stats.Get(StatType.Vitality))
+                    .ToList();
 
                 // Start a Combat instance with Enemies
-                return new Return($"\nEntering {RoomName}, you find enemies!", new CombatManager(Enemies));
+                return new Return($"\nEntering {RoomName}, you find enemies!", new CombatManager(Enemies), combatants: combatants);
             }
 
             // Else Return the normal description stuff.
@@ -86,6 +108,61 @@ namespace Rooms
         {
             Enemies.Clear();
         }
+
+        // Save/Load
+        //
+        // Description/Choices/_handlers are never serialized directly - they're
+        // rebuilt as a side effect of Replay() re-calling whichever transition
+        // methods already fired (see MarkDone/IsDone below), the same way they
+        // were built the first time the player took those actions.
+        private readonly HashSet<string> _flags = new();
+
+        /// <summary>
+        /// Call at the end of a state-transition method (e.g. GrabKey, OpenDoor)
+        /// to record that it has completed, so Replay() can re-fire it on load.
+        /// Takes no argument on purpose - CallerMemberName means there's no
+        /// string to typo or let drift from the method it's marking.
+        /// </summary>
+        protected void MarkDone([CallerMemberName] string? method = null)
+        {
+            _flags.Add(method!);
+        }
+
+        protected bool IsDone(string method) => _flags.Contains(method);
+
+        public virtual RoomSaveData Save()
+        {
+            return new RoomSaveData
+            {
+                ItemTypes = Items.Select(i => i.GetType().Name).ToList(),
+                Flags = _flags.ToList()
+            };
+        }
+
+        public virtual void Load(RoomSaveData data)
+        {
+            Items.Clear();
+            foreach (string typeName in data.ItemTypes)
+            {
+                Items.Add(ItemFactory.Create(typeName));
+            }
+
+            _flags.Clear();
+            foreach (string flag in data.Flags)
+            {
+                _flags.Add(flag);
+            }
+
+            Replay();
+        }
+
+        /// <summary>
+        /// Re-fires whichever transition methods MarkDone recorded, in the order
+        /// they need to happen in, so Description/Choices/_handlers end up back
+        /// where they were. Rooms with no branching state (most of them) never
+        /// need to override this - the default no-op is already correct.
+        /// </summary>
+        protected virtual void Replay() { }
 
         protected void RegisterHandler(Command command, Func<Return> handler, bool showChoice = true, string? displayText = null)
         {

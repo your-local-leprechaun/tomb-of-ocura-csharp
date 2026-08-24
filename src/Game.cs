@@ -8,8 +8,8 @@ namespace Main
 {
     public class Game
     {
-        IState _activeState = new MainMenu();
-        // IState _activeState = Rooms.Room6.Get;
+        // IState _activeState = new MainMenu();
+        IState _activeState = Rooms.Room6.Get;
         IState? _previousState = null;
         Parser.Parser parser = new Parser.Parser();
         Frontend.Display Display = new Frontend.Display();
@@ -20,73 +20,96 @@ namespace Main
         /// </summary>
         public void GameLoop()
         {
+            bool skipInput = false;
             while (true)
             {
-                // Get Player input
-                string input = Display.Input();
+                Command command;
 
-                try
+                if (!skipInput)
                 {
-                    Command command = parser.ParseInput(input);
+                    // Get Player input
+                    string input = Display.Input();
 
-                    Return response;
-
-                    // Check for basic commands (Exit)
-                    if (command.Verb == "exit")
+                    try
                     {
-                        Quit();
+                        command = parser.ParseInput(input);
+
+                        // Set SkipInput false
+                        skipInput = false;
+
+                    }
+                    catch (ParseException e)
+                    {
+                        Display.RenderError(e.Message);
                         continue;
                     }
-                    else if (command == new Command("status", "player"))
+                    catch (CommandException e)
                     {
-                        Player player = Player.Get;
-                        response = player.Status();
+                        Display.RenderError(e.Message);
+                        continue;
                     }
-                    else
-                    {
-                        // Call command to the active state, and recieve information back
-                        response = _activeState.Execute(command);
-                    }
+                }
+                else
+                {
+                    command = new Command("skip", "input");
+                }
 
-                    // Display message
+                Return response;
+
+                // Check for basic commands
+                if (command.Verb == "exit")
+                {
+                    Quit();
+                    continue;
+                }
+                else if (command == new Command("status", "player"))
+                {
+                    Player player = Player.Get;
+                    response = player.Status();
+                }
+                else if (command == new Command("save", "game"))
+                {
+                    response = new Return(SaveManager.Save());
+                }
+                else if (command == new Command("load", "game"))
+                {
+                    response = new Return(SaveManager.Load());
+                }
+                else
+                {
+                    response = _activeState.Execute(command);
+                }
+
+
+                // Call to active State with command
+                Display.Render(response, Player.Get);
+
+                // Check through all possible return conditions
+                while (response.UpdateState != null)
+                {
+                    _previousState = _activeState;
+                    _activeState = response.UpdateState;
+                    response = _activeState.Activate();
                     Display.Render(response, Player.Get, _activeState.Name);
-
-                    // Update state if needed (loop in case Activate() itself
-                    // triggers another transition, e.g. entering a room with enemies)
-                    while (response.UpdateState != null)
-                    {
-                        _previousState = _activeState;
-                        _activeState = response.UpdateState;
-                        response = _activeState.Activate();
-                        Display.Render(response, Player.Get, _activeState.Name);
-                    }
-
-                    // Return to Previous State
-                    if (response.Previous == true && _previousState != null)
-                    {
-                        var temp = _activeState;
-                        _activeState = _previousState;
-                        _previousState = temp;
-                        response = _activeState.Activate();
-                        Display.Render(response, Player.Get, _activeState.Name);
-                    }
-
-                    // Set Checkpoint
-                    if (response.Checkpoint != null)
-                    {
-                        RoomRegistry.UpdateCheckpoint(_activeState as IRoom ?? null);
-                    }
                 }
-                catch (ParseException e)
+
+                // Return to Previous State
+                if (response.Previous == true && _previousState != null)
                 {
-                    Display.RenderError(e.Message);
-                    continue;
+                    var temp = _activeState;
+                    _activeState = _previousState;
+                    _previousState = temp;
+                    response = _activeState.Activate();
+                    Display.Render(response, Player.Get, _activeState.Name);
                 }
-                catch (CommandException e)
+
+                // Set Checkpoint
+                if (response.Checkpoint != null)
                 {
-                    Display.RenderError(e.Message);
-                    continue;
+                    RoomRegistry.UpdateCheckpoint(_activeState as IRoom ?? null);
                 }
+
+                skipInput = response.SkipInput == true;
             }
         }
 

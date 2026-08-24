@@ -26,13 +26,18 @@ namespace Rooms
 
             CollectItem<BasicKey>();
             UnregisterHandler(new Command("grab", "key"));
+            MarkDone();
 
             return new Return("You pickup the key");
         }
 
         private Return OpenDoor()
         {
-            if (Inventory.Get.Contains<BasicKey>())
+            // The key check is normally what gates this - but during Replay() the
+            // key's already been consumed (it was removed from inventory the first
+            // time this ran), so IsDone stands in for "we already know this happened"
+            // once the flag's been loaded from a save.
+            if (Inventory.Get.Contains<BasicKey>() || IsDone(nameof(OpenDoor)))
             {
                 //Open Door
                 UpdateDescription("You are in a brick room with an opened jail cell. There is a bed, a pile of hay, and a room to the north.");
@@ -40,6 +45,7 @@ namespace Rooms
                 RegisterHandler(new Command("check", "hay"), CheckHay, showChoice: false);
                 UnregisterHandler(new Command("open", "door"));
                 Inventory.Get.RemoveItem<BasicKey>();
+                MarkDone();
 
                 return new Return("You use the basic key, and push open the cell door. There's a pile of hay and a room to the north.");
             }
@@ -58,7 +64,20 @@ namespace Rooms
             UpdateDescription("You are in a brick room with an opened jail cell. There is a bed in the cell and a room to the north.");
             UnregisterHandler(new Command("check", "hay"));
             CollectItem<Note12>();
+            MarkDone();
             return new Return("Looking through the pile of hay, you find a small note.");
+        }
+
+        /// <summary>
+        /// Re-fires whichever of the above already completed, in the order they
+        /// depend on each other, so the room's handlers/description end up back
+        /// where they were without needing to serialize either directly.
+        /// </summary>
+        protected override void Replay()
+        {
+            if (IsDone(nameof(GrabKey))) GrabKey();
+            if (IsDone(nameof(OpenDoor))) OpenDoor();
+            if (IsDone(nameof(CheckHay))) CheckHay();
         }
 
         private Return UseBed()

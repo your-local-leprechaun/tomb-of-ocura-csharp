@@ -40,13 +40,18 @@ namespace Frontend
         /// <param name="stateName">Name of the active state to show in the top bar - Game.cs passes this in directly, since it's a property of the state rather than something a Return carries</param>
         public void Render(Return response, Player player, string? stateName = null, string end = "\n")
         {
+            if (stateName != null)
+            {
+                _window!.Invoke(() => _window.UpdateStateBar(stateName));
+            }
+
+            // Text prints first, side panel updates after - so a turn's
+            // numbers don't jump to their post-turn value while the message
+            // describing that turn is still typing out.
+            PrintOut(response.Message + end);
+
             _window!.Invoke(() =>
             {
-                if (stateName != null)
-                {
-                    _window.UpdateStateBar(stateName);
-                }
-
                 if (response.Combatants is { Count: > 0 })
                 {
                     _window.ShowCombatPanel(response.Combatants);
@@ -60,7 +65,6 @@ namespace Frontend
                     _window.ShowPlayerPanel(player);
                 }
             });
-            PrintOut(response.Message + end);
         }
 
         /// <summary>

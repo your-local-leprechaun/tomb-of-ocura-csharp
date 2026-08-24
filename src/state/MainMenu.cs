@@ -11,13 +11,18 @@ public class MainMenu : IState
     {
         if (command.Verb == "start" && command.Noun == "game")
         {
+            
             return new Return("\nBeginning your journey into Ocura...", Rooms.Room1.Get);
+        }
+        else if (command == new Command("load", "game"))
+        {
+            
         }
         return new Return("--Unknown Command--");
     }
 
     public Return Activate()
     {
-        return new Return("\nStart Game\nQuit");
+        return new Return("Start Game\nLoad Game\nQuit");
     }
 }
