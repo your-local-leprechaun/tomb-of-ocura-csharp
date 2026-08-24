@@ -29,16 +29,15 @@ namespace Frontend
 
         /// <summary>
         /// Renders a Return to the screen: its message, plus the side panel
-        /// and the top state bar. The panel shows whichever of Combatants/
-        /// Equipment the Return set - Combatants wins if both are somehow
-        /// set - and falls back to the player's own stats when neither is.
+        /// and the top state bar. The panel just shows response.Panel's text
+        /// verbatim - SidePanel.cs is what decides what that text says.
         /// The state bar shows stateName if one's given, and is otherwise
         /// left as whatever it was already showing.
         /// </summary>
         /// <param name="response">The Return to display - drives both the message and the side panel</param>
-        /// <param name="player">Player whose info populates the side panel when there's nothing more specific to show</param>
+        /// <param name="player">Unused by Render itself now that SidePanel.cs pulls the player straight from Player.Get, but kept so call sites don't all need updating</param>
         /// <param name="stateName">Name of the active state to show in the top bar - Game.cs passes this in directly, since it's a property of the state rather than something a Return carries</param>
-        public void Render(Return response, Player player, string? stateName = null, string end = "\n")
+        public void Render(Return response, string? stateName = null, string end = "\n")
         {
             if (stateName != null)
             {
@@ -50,21 +49,7 @@ namespace Frontend
             // describing that turn is still typing out.
             PrintOut(response.Message + end);
 
-            _window!.Invoke(() =>
-            {
-                if (response.Combatants is { Count: > 0 })
-                {
-                    _window.ShowCombatPanel(response.Combatants);
-                }
-                else if (response.Equipment == true)
-                {
-                    _window.ShowEquipmentPanel(player);
-                }
-                else
-                {
-                    _window.ShowPlayerPanel(player);
-                }
-            });
+            _window!.Invoke(() => _window.ShowPanel(response.Panel));
         }
 
         /// <summary>
@@ -85,11 +70,11 @@ namespace Frontend
 
         public void Exit()
         {
-            Render(new Return("Are you sure you want to quit? (y/N)"), Player.Get);
+            Render(new Return("Are you sure you want to quit? (y/N)"));
             string response = Input().ToLower();
             if (response == "y")
             {
-                Render(new Return("Exiting game..."), Player.Get);
+                Render(new Return("Exiting game..."));
                 Environment.Exit(0);
             }
         }
@@ -368,21 +353,9 @@ namespace Frontend
                 _stateBar.Text = stateName;
             }
 
-            public void ShowPlayerPanel(Player p)
+            public void ShowPanel(string text)
             {
-                SetPanelText($"{p.Name}\nLevel {p.Level}\nXP: {p.PlayerExperience}\nHP: {p.CurrHealth}/{p.MaxHealth}\n\n{p.Stats.Status()}");
-            }
-
-            public void ShowCombatPanel(List<ICombatant> combatants)
-            {
-                SetPanelText(string.Join(
-                    "\n\n",
-                    combatants.Select(c => $"{c.Name}\nLvl {c.Level} {Regex.Replace(c.GetType().Name, @"(?<!^)(?=[A-Z])", " ")}\n{c.CurrHealth}/{c.MaxHealth}")));
-            }
-
-            public void ShowEquipmentPanel(Player p)
-            {
-                SetPanelText($"{p.Name}\nLevel {p.Level}\nXP: {p.PlayerExperience}\nHP: {p.CurrHealth}/{p.MaxHealth}\n\n{p.Equipment.Status()}");
+                SetPanelText(text);
             }
 
             // Whenever the panel's content is replaced outright (switching

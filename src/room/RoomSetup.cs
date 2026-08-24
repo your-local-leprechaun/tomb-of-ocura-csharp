@@ -8,6 +8,7 @@ using System.Text;
 using System.Runtime.CompilerServices;
 using Combatants;
 using Stats;
+using Frontend;
 
 namespace Rooms
 {
@@ -82,7 +83,7 @@ namespace Rooms
                     .ToList();
 
                 // Start a Combat instance with Enemies
-                return new Return($"\nEntering {RoomName}, you find enemies!", new CombatManager(Enemies), combatants: combatants);
+                return new Return($"\nEntering {RoomName}, you find enemies!", new CombatManager(Enemies), sidePanel: SidePanel.CombatPanel(combatants));
             }
 
             // Else Return the normal description stuff.

@@ -6,6 +6,7 @@ using Items.Equipment;
 using Parser;
 using Returns;
 using State;
+using Frontend;
 
 public class Inventory : Singleton<Inventory>, IState
 {
@@ -58,7 +59,7 @@ public class Inventory : Singleton<Inventory>, IState
         }
 
         // Return actual Return
-        return new Return(message, equipment: true);
+        return new Return(message, sidePanel: SidePanel.EquipmentPanel());
     }
 
     public Return Examine(Command command)
@@ -154,7 +155,7 @@ public class Inventory : Singleton<Inventory>, IState
 
     public Return Activate()
     {
-        return new Return(List().Message, equipment: true);
+        return new Return(List().Message, sidePanel: SidePanel.EquipmentPanel());
     }
 
     public Return List()

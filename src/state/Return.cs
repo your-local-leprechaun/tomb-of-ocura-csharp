@@ -1,5 +1,5 @@
 
-using Combatants;
+using Frontend;
 using Rooms;
 
 namespace Returns
@@ -7,24 +7,22 @@ namespace Returns
     public class Return
     {
         public string Message { get; init; }
+        public string Panel { get; init; }
 
         public State.IState? UpdateState { get; init; } = null;
 
         public bool? Previous { get; init; } = null;
         public bool? EarlyReturn { get; init; } = null;
         public bool? SkipInput { get; init; } = null;
-        public List<ICombatant>? Combatants { get; init; } = null;
-        public bool? Equipment { get; init; } = null;
         public bool? Checkpoint { get; init; } = null;
 
         public Return (
             string message,
             State.IState? state = null,
+            string? sidePanel = null,
             bool? previous = null,
             bool? earlyReturn = null,
             bool? skipInput = null,
-            List<ICombatant>? combatants = null,
-            bool? equipment = null,
             bool? checkpoint = null)
         {
             Message = message;
@@ -32,6 +30,7 @@ namespace Returns
             {
                 UpdateState = state;
             }
+            Panel = sidePanel ?? SidePanel.Basic();
             if (previous != null)
             {
                 Previous = previous;
@@ -44,18 +43,10 @@ namespace Returns
             {
                 SkipInput = skipInput;
             }
-            if (combatants != null)
-            {
-                Combatants = combatants;
-            }
-            if (equipment != null)
-            {
-                Equipment = equipment;
-            }
             if (checkpoint != null)
             {
                 Checkpoint = checkpoint;
             }
-        } 
+        }
     }
 }

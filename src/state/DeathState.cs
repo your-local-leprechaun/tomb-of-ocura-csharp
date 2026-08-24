@@ -24,6 +24,6 @@ public class DeathState : IState
         RoomRegistry.RespawnTouched();
 
         // Set state to checkpoint in RoomRegistry
-        return new Return("You awake at your last checkpoint.", RoomRegistry.Checkpoint as IState);
+        return new Return("You awake at your last checkpoint.", RoomRegistry.Checkpoint as IState, SidePanel.Blank());
     }
 }

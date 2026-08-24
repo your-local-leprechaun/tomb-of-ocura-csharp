@@ -11,7 +11,6 @@ public class MainMenu : IState
     {
         if (command.Verb == "start" && command.Noun == "game")
         {
-            
             return new Return("\nBeginning your journey into Ocura...", Rooms.Room1.Get);
         }
         else if (command == new Command("load", "game"))
@@ -23,6 +22,6 @@ public class MainMenu : IState
 
     public Return Activate()
     {
-        return new Return("Start Game\nLoad Game\nQuit");
+        return new Return("Start Game\nLoad Game\nQuit", sidePanel: SidePanel.CustomPanel("Created by: Luke Wulf"));
     }
 }

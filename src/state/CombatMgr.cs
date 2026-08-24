@@ -1,6 +1,7 @@
 using Combatants;
 using Commands;
 using Enemies;
+using Frontend;
 using Items;
 using Parser;
 using Returns;
@@ -38,12 +39,12 @@ class CombatManager : IState
             {
                 if (command.Verb == "check" && !_combatants.Any(c => c.Name.ToLower() == command.Noun))
                 {
-                    return new Return(Inventory.Get.Examine(command).Message, earlyReturn: true, equipment: true);
+                    return new Return(Inventory.Get.Examine(command).Message, earlyReturn: true, sidePanel: SidePanel.EquipmentPanel());
                 }
                 else if (command == new Command("close", "inventory"))
                 {
                     _browsingInventory = false;
-                    return new Return("You tuck your things away and refocus on the fight.", earlyReturn: true, combatants: _combatants);
+                    return new Return("You tuck your things away and refocus on the fight.", earlyReturn: true, sidePanel: SidePanel.CombatPanel(_combatants));
                 }
                 else if (command.Verb == "equip")
                 {
@@ -73,12 +74,12 @@ class CombatManager : IState
                 command == new Command("show", "items"))
                 {
                     _browsingInventory = true;
-                    return new Return(Inventory.Get.List().Message, earlyReturn: true, equipment: true);
+                    return new Return(Inventory.Get.List().Message, earlyReturn: true, sidePanel: SidePanel.EquipmentPanel());
                 }
                 else if (command.Verb == "check" && _combatants.Any(c => c.Name.ToLower() == command.Noun))
                 {
                     IEnemy enemy = (IEnemy)_combatants.First(c => c.Name.ToLower() == command.Noun);
-                    return new Return(enemy.Status(), earlyReturn: true, combatants: _combatants);
+                    return new Return(enemy.Status(), earlyReturn: true, sidePanel: SidePanel.CombatPanel(_combatants));
                 }
 
                 Return result = Player.Get.PlayerAction(command, _combatants);
@@ -88,9 +89,7 @@ class CombatManager : IState
 
                 if (result.EarlyReturn == true)
                 {
-                    return result.Equipment == true
-                        ? new Return(string.Join("\n", ReturnMessage), equipment: true)
-                        : new Return(string.Join("\n", ReturnMessage), combatants: _combatants);
+                    return new Return(string.Join("\n", ReturnMessage), sidePanel: SidePanel.CombatPanel(_combatants));
                 }
 
                 // Check if only player is left (win condition)
@@ -131,7 +130,7 @@ class CombatManager : IState
         if (Player.Get.CurrHealth <= 0)
         {
             ReturnMessage.Add("\n**YOU DIED**\n");
-            return new Return(string.Join("\n", ReturnMessage), new DeathState());
+            return new Return(string.Join("\n", ReturnMessage), new DeathState(), SidePanel.Blank());
         }
 
         NextTurn();
@@ -148,7 +147,7 @@ class CombatManager : IState
             ReturnMessage.Add($"{_combatants[_initiative].Name}'s turn");
         }
 
-        return new Return(string.Join("\n", ReturnMessage), combatants: _combatants, skipInput: SkipInput);
+        return new Return(string.Join("\n", ReturnMessage), sidePanel: SidePanel.CombatPanel(_combatants), skipInput: SkipInput);
     }
 
     /// <summary>
@@ -173,7 +172,7 @@ class CombatManager : IState
 
         ReturnMessage.Add("Player's Turn");
 
-        return new Return(string.Join("\n", ReturnMessage), combatants: _combatants);
+        return new Return(string.Join("\n", ReturnMessage), sidePanel: SidePanel.CombatPanel(_combatants));
     }
 
     public CombatManager(List<ICombatant> enemies)

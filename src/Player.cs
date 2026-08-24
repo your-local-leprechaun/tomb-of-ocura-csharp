@@ -5,6 +5,7 @@ using Commands;
 using Parser;
 using Enemies;
 using Items.Equipment;
+using Frontend;
 
 public class Player : CombatantBase
 {
@@ -79,7 +80,7 @@ public class Player : CombatantBase
             // Now that we have our melee weapon, let's swing to see if we hit the creature.
             if (!(weapon.TryHit() || _hold))
             {
-                return new Return($"Player misses {enemy.Name} using {weapon.ItemName}", combatants: combatants);
+                return new Return($"Player misses {enemy.Name} using {weapon.ItemName}", sidePanel: SidePanel.CombatPanel(combatants));
             }
             _hold = false;
 
@@ -90,15 +91,15 @@ public class Player : CombatantBase
             if (enemy.CurrHealth <= 0)
             {
                 PlayerExperience += enemy.Experience;
-                return new Return($"Player kills {enemy.Name}. {enemy.Experience}xp gained.", combatants: combatants);
+                return new Return($"Player kills {enemy.Name}. {enemy.Experience}xp gained.", sidePanel: SidePanel.CombatPanel(combatants));
             }
 
-            return new Return($"Player hits {enemy.Name} for {dealtDamage}", combatants: combatants);
+            return new Return($"Player hits {enemy.Name} for {dealtDamage}", sidePanel: SidePanel.CombatPanel(combatants));
         }
         else if (command == new Command("hold", "action"))
         {
             Hold();
-            return new Return($"Player preps for their next attack.", combatants: combatants);
+            return new Return($"Player preps for their next attack.", sidePanel: SidePanel.CombatPanel(combatants));
         }
         else if (command.Verb == "check")
         {
@@ -109,7 +110,7 @@ public class Player : CombatantBase
                 throw new InvalidTargetException(command.Noun);
             }
 
-            return new Return(enemy.Status(), earlyReturn: true, combatants: combatants);
+            return new Return(enemy.Status(), earlyReturn: true, sidePanel: SidePanel.CombatPanel(combatants));
         }
         else if (command.Verb == "cast")
         {
@@ -131,7 +132,7 @@ public class Player : CombatantBase
             // Put spell on enemy now
             enemy.Conditions.Apply(spell.Status);
 
-            return new Return($"{enemy.Name} has been {spell.Status.Name}!", combatants: combatants);
+            return new Return($"{enemy.Name} has been {spell.Status.Name}!", sidePanel: SidePanel.CombatPanel(combatants));
         }
 
         throw new UnknownCommandException(command);
