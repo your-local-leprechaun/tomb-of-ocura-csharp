@@ -17,7 +17,7 @@ public class Inventory : Singleton<Inventory>, IState
         AddItem(new Trash());
         AddItem(new Trash());
         AddItem(new HealthPotion());
-        AddItem(new BasicSword());
+        AddItem(new RustySword());
     }
 
     public static Inventory Get => Instance;

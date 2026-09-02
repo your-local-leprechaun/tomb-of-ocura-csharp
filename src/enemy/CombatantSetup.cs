@@ -19,8 +19,8 @@ namespace Combatants
 
         StatusManager Conditions { get; }
 
-        int Damage(int damage);
-        void DirectDamage(int damage);
+        (int, int) Reduction();
+        void Damage(int damage);
         int Heal(int damage);
 
         Return TakeAction(List<ICombatant> combatants);
@@ -51,18 +51,12 @@ namespace Combatants
         public EquipmentManager Equipment { get; }
         public StatusManager Conditions { get; }
 
-        public int Damage(int damage)
+        public (int, int) Reduction()
         {
-            int dealtDamage = damage - Equipment.TotalReduction();
-            if (dealtDamage < 0)
-            {
-                dealtDamage = 0;
-            }
-            CurrHealth -= dealtDamage;
-            return dealtDamage;
+            return (Stats.Get(StatType.Fortitude), Equipment.TotalReduction());
         }
 
-        public void DirectDamage(int damage)
+        public void Damage(int damage)
         {
             CurrHealth -= damage;
         }
@@ -93,6 +87,17 @@ namespace Combatants
         public virtual Return TakeAction(List<ICombatant> combatants)
         {
             return new Return($"{Name}'s turn");
+        }
+
+        protected static int DamageFormula(int M, int b, int F, int A)
+        {
+            int MinDamage = 0;
+            // double k = 0.5;
+            // double FScale = 0.5;
+            // double MScale = 1.0;
+
+            int realDamage = M * b / F; 
+            return realDamage;
         }
     }   
 }

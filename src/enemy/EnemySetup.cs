@@ -115,11 +115,17 @@ namespace Enemies
             }
             _hold = false;
 
-            int damage = CalcDamage(move.MinDamage, move.MaxDamage);
-            int dealtDamage = Player.Get.Damage(damage);
-            if (dealtDamage != 0)
+            int b = CalcDamage(move.MinDamage, move.MaxDamage);
+            var (F, A) = Player.Get.Reduction();
+            int M = Stats.Get(StatType.Might);
+
+            int trueDamage = DamageFormula(M, b, F, A);
+
+            Player.Get.Damage(trueDamage);
+            
+            if (trueDamage != 0)
             {
-                return new Return($"{Name} hits Player with {move.Name} for {dealtDamage}!");
+                return new Return($"{Name} hits Player with {move.Name} for {trueDamage}!");
             }
             return new Return($"{Name} hits Player with {move.Name}, but deals no damage!");
         }
@@ -135,11 +141,18 @@ namespace Enemies
             }
             _hold = false;
 
-            int damage = weapon.CalcDamage();
-            int dealtDamage = Player.Get.Damage(damage);
-            if (dealtDamage != 0)
+            // Roll damage, and pass to enemy. Then recieve how much damage we actually did and what health the enemy is now at.
+            int b = weapon.CalcDamage();
+            var (F, A) = Player.Get.Reduction();
+            int M = Stats.Get(StatType.Might);
+
+            int trueDamage = DamageFormula(M, b, F, A);
+
+            Player.Get.Damage(trueDamage);
+
+            if (trueDamage != 0)
             {
-                return new Return($"{Name} hits Player with {weapon.ItemName} for {dealtDamage}!");
+                return new Return($"{Name} hits Player with {weapon.ItemName} for {trueDamage}!");
             }
             return new Return($"{Name} hits Player with {weapon.ItemName}, but deals no damage!");
         }
@@ -208,13 +221,13 @@ namespace Enemies
             {
                 ReturnMessage.Add(response.Message);
             }
-            
+
             // If enemy is dead, return
             if (CurrHealth <= 0)
             {
                 ReturnMessage.Add($"{Name} died! {Experience}xp gained!");
                 Player.Get.PlayerExperience += Experience;
-                return new Return(string.Join("\n", ReturnMessage));    
+                return new Return(string.Join("\n", ReturnMessage));
             }
 
             // Take turn if not dead!

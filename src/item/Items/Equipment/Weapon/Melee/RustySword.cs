@@ -6,8 +6,8 @@ namespace Items.Equipment
             "Rusty Sword",
             "An old, rusty sword. It doesn't look powerful.",
             75,
-            2,
-            4
+            4,
+            6
         )
         {
             Parser.Parser.RegisterAdjective("Rusty");

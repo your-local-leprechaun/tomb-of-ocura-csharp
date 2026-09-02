@@ -13,7 +13,7 @@ namespace Status
 
         public override Return Inflict(ICombatant target)
         {
-            target.DirectDamage(Damage);
+            target.Damage(Damage);
             Time -= 1;
 
             return new Return($"{target.Name} takes {Damage} damage from poison!\n{target.Name} HP({target.CurrHealth}/{target.MaxHealth})");

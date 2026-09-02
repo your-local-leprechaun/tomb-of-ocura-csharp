@@ -6,6 +6,7 @@ using Parser;
 using Enemies;
 using Items.Equipment;
 using Frontend;
+using System.Runtime.ExceptionServices;
 
 public class Player : CombatantBase
 {
@@ -32,17 +33,18 @@ public class Player : CombatantBase
         0,
         new Dictionary<StatType, int>
         {
-            { StatType.Might, 12},
-            { StatType.Arcana, 12},
-            { StatType.Fortitude, 12},
-            { StatType.Vitality, 12},
-            { StatType.Chance, 12},
+            { StatType.Might, 5},
+            { StatType.Arcana, 5},
+            { StatType.Fortitude, 5},
+            { StatType.Vitality, 5},
+            { StatType.Chance, 5},
         },
         new Dictionary<EquipType, IEquipment>
         {
             // Debug gear for testing combat without walking to the item each run.
             // { EquipType.Melee, new MeleeBase("Debug Sword", "A sword for debuggers", 99, 4, 20) { IsEquipped = true } },
-            { EquipType.Spell, new PoisonMist() }
+            { EquipType.Melee, new RustySword() }
+            // { EquipType.Spell, new PoisonMist() }
             // { EquipType.Chest, new ArmorBase("Debug Chest", "A chestplate for debugging", EquipType.Chest, 10) { IsEquipped = true } }
         }
     )
@@ -74,8 +76,7 @@ public class Player : CombatantBase
 
             // Enemy is in target range! Try to hit, and then damage if we do hit! This is for melee only
             // First, let's grab our melee weapon object, or use the fist objects if needed.
-            IEquipment? equipped = Equipment.EquippedSlot(EquipType.Melee);
-            IMelee weapon = equipped as IMelee ?? new Fist();
+            IMelee weapon = Equipment.EquippedSlot(EquipType.Melee) as IMelee ?? new Fist();
 
             // Now that we have our melee weapon, let's swing to see if we hit the creature.
             if (!(weapon.TryHit() || _hold))
@@ -85,8 +86,13 @@ public class Player : CombatantBase
             _hold = false;
 
             // Roll damage, and pass to enemy. Then recieve how much damage we actually did and what health the enemy is now at.
-            int damage = weapon.CalcDamage();
-            int dealtDamage = enemy.Damage(damage);
+            int b = weapon.CalcDamage();
+            var (F, A) = enemy.Reduction();
+            int M = Stats.Get(StatType.Might);
+
+            int trueDamage = DamageFormula(M, b, F, A);
+
+            enemy.Damage(trueDamage);
 
             if (enemy.CurrHealth <= 0)
             {
@@ -94,7 +100,7 @@ public class Player : CombatantBase
                 return new Return($"Player kills {enemy.Name}. {enemy.Experience}xp gained.", sidePanel: SidePanel.CombatPanel(combatants));
             }
 
-            return new Return($"Player hits {enemy.Name} for {dealtDamage}", sidePanel: SidePanel.CombatPanel(combatants));
+            return new Return($"Player hits {enemy.Name} for {trueDamage}", sidePanel: SidePanel.CombatPanel(combatants));
         }
         else if (command == new Command("hold", "action"))
         {
